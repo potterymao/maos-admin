@@ -1,0 +1,19 @@
+:root {
+  --navbar-height: 100px;
+
+  --header-height: calc(var(--navbar-height) + var(--header-border-bottom-width));
+  --header-bg-color: #ffffff;
+  --header-box-shadow: var(--el-box-shadow-lighter);
+  --header-border-bottom-width: 1px;
+  --header-border-bottom: var(--header-border-bottom-width) solid var(--el-fill-color);
+
+  --sidebar-width: 220px;
+  --sidebar-hide-width: 58px;
+  --sidebar-border-right: 1px solid var(--el-fill-color);
+  --sidebar-menu-item-height: 60px;
+  --sidebar-menu-tip-line-bg-color: var(--el-color-primary);
+  --sidebar-menu-bg-color: #ffffff;
+  --sidebar-menu-hover-bg-color: #e5f9e9;
+  --sidebar-menu-text-color: #333333;
+  --sidebar-menu-active-text-color: #000b88;
+}

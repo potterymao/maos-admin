@@ -1,0 +1,40 @@
+{
+  "name": "maos-admin",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "deploy": "gh-pages --dotfiles -d .output/public"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "@nuxt/devtools": "^4.0.0-alpha.3",
+    "@nuxt/icon": "^2.2.1",
+    "@nuxt/ui": "^4.4.0",
+    "@nuxtjs/i18n": "^10.2.1",
+    "@pinia/nuxt": "^0.11.3",
+    "dayjs-nuxt": "^2.1.11",
+    "html2canvas-pro": "^2.0.2",
+    "interactjs": "^1.10.27",
+    "nuxt": "^4.4.2",
+    "nuxt-svgo": "^4.2.6",
+    "path-browserify": "^1.0.1",
+    "pinia": "^3.0.4",
+    "tailwindcss": "^4.1.18",
+    "vue": "^3.5.27",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@element-plus/nuxt": "^1.1.4",
+    "@types/node": "^25.0.10",
+    "@types/path-browserify": "^1.0.3",
+    "element-plus": "^2.13.1",
+    "gh-pages": "^6.3.0",
+    "sass-embedded": "^1.97.3",
+    "vite-plugin-vue-devtools": "^8.1.1"
+  }
+}

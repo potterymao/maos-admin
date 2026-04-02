@@ -1,0 +1,41 @@
+{
+    "app": {
+        "title": "Plate Designer",
+        "description": "Design your custom plate"
+    },
+    "designer": {
+        "selectPlate": "Select Plate",
+        "addPattern": "Add Pattern",
+        "preview": "Preview",
+        "save": "Save Design",
+        "clear": "Clear",
+        "rotate": "Rotate",
+        "scale": "Scale",
+        "delete": "Delete",
+        "position": "Position",
+        "designArea": "Design Area",
+        "patterns": "Pattern Library",
+        "plates": "Plate Styles",
+        "totalPrice": "Total Price",
+        "currency": "$",
+        "size": "Size",
+        "price": "Price",
+        "design_info": "Information",
+        "pattern_selector_desc": "Description",
+        "pattern_selector_desc-1": "• Select pattern on plate"
+    },
+    "patterns": {
+        "all": "All Patterns",
+        "animals": "Animals",
+        "flowers": "Flowers",
+        "geometrics": "Geometric",
+        "text": "Text",
+        "custom": "Custom"
+    },
+    "plates": {
+        "round": "Round Plate",
+        "square": "Square Plate",
+        "oval": "Oval Plate",
+        "rectangle": "Rectangle Plate"
+    }
+}

@@ -1,0 +1,59 @@
+/* .m_breadcrumb {
+  line-height: unset !important;
+  margin: 0 0 5px 0 !important;
+} */
+
+/* .toolbar-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+} */
+
+.app-wrapper {
+  /* @extend %clearfix; */
+  width: 100%;
+}
+
+.table-wrapper {
+  margin-bottom: 20px;
+}
+
+.pager-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/***** decal-design *****/
+.design-panel-title {
+  font-weight: 600;
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #3498db;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* .custom-descs .el-descriptions__label {
+  width: 10%;
+}
+.custom-descs .el-descriptions__content {
+  width: 15%;
+}
+
+.el-divider__text {
+  font-weight: bold !important;
+  color: #5364ff !important;
+}
+
+.m_breadcrumb {
+  line-height: unset !important;
+  margin: 0 0 5px 0 !important;
+}
+
+.m_page_title {
+  font-size: 20px !important;
+  font-weight: bold;
+} */
