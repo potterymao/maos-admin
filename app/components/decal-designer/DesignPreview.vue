@@ -32,7 +32,8 @@
         <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
           <div class="text-sm font-bold text-gray-500 mb-1">盤子樣式</div>
           <div class="text-lg font-semibold text-gray-800">
-            {{ designStore.currentPlate?.name }}
+            {{ appStore.locale === "zh-TW" ? designStore.currentPlate?.name_zh : designStore.currentPlate?.name_en }}
+            <!-- {{ designStore.currentPlate?.name }} -->
           </div>
         </div>
 
@@ -212,6 +213,7 @@
 <script setup lang="ts">
 import html2canvas from "html2canvas-pro";
 
+const appStore = useAppStore();
 const designStore = useDesignStore();
 
 const currentPlate = computed(() => designStore.currentPlate);

@@ -1,12 +1,12 @@
 <template>
   <div class="app-wrapper">
-    <div class="fixed-header layout-header">
+    <!-- <div class="fixed-header layout-header">
       <div class="content">
         <Logo v-if="showLogo" :collapse="false" class="logo" />
         <nav-bar class="nav-bar" />
       </div>
-      <!-- <TagsView v-show="showTagsView" /> -->
-    </div>
+      <TagsView v-show="showTagsView" />
+    </div> -->
 
     <!-- <div :class="{ hasTagsView: showTagsView }" class="main-container"> -->
     <div class="main-container">
