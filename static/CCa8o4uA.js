@@ -1,0 +1,1 @@
+import{u as e}from"./CMOTIK_b.js";import{G as a,aU as o,c as t,o as r}from"./BfpKrGvo.js";const _=a({__name:"index",setup(n){return e().firstPage===""&&o("/designer/decal-designer"),(p,c)=>(r(),t("div"))}});export{_ as default};
