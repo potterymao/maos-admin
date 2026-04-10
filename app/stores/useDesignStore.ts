@@ -40,15 +40,12 @@ export const useDesignStore = defineStore("design", {
       const response = await GetPlates();
       // console.log("Loaded plates:", response.items);
       for (const item of response.items) {
-        // const imageData = item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "";
-
         this.plates.push({
           id: item.id,
           name_en: item.title_translations.en,
           name_zh: item.title_translations["zh-hant"],
           // image: item.medias?.[0]?.images.source.url || "",
-          // image: imageData,
-          image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "";
+          image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
           type: item.type,
           size: { width: 350, height: 350 },
           price: item.price.dollar || 300,
@@ -106,8 +103,6 @@ export const useDesignStore = defineStore("design", {
       const response = await GetPatterns();
       // console.log("Loaded patterns:", response.items);
       for (const item of response.items) {
-        const imageData = item.medias?.[0]?.images.source.url ? GetImage(item.medias?.[0]?.images.source.url) : "";
-        
         this.patterns.push({
           id: item.id,
           name_en: item.title_translations["en"],
@@ -116,7 +111,7 @@ export const useDesignStore = defineStore("design", {
           type: item.type,
           category: item.category_id,
           // image: item.medias?.[0]?.images.source.url || "",
-          image: imageData,
+          image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
           size: { width: 30, height: 30 },
           defaultSize: 50,
         });
