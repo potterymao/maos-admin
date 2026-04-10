@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { GetPlates, GetPatterns } from "@/api";
+import { GetPlates, GetPatterns, GetImage } from "@/api";
 import type { Plate, PlateDesign, PlateStyle, Pattern, PlacedPattern, DesignState } from "~~/types";
 
 export const useDesignStore = defineStore("design", {
@@ -39,17 +39,18 @@ export const useDesignStore = defineStore("design", {
       this.currentPlate = null;
       const response = await GetPlates();
       // console.log("Loaded plates:", response.items);
-      response.items.forEach((item: any) => {
+      for (const item of response.items) {
         this.plates.push({
           id: item.id,
           name_en: item.title_translations.en,
           name_zh: item.title_translations["zh-hant"],
-          image: item.medias?.[0]?.images.source.url || "",
+          // image: item.medias?.[0]?.images.source.url || "",
+          image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
           type: item.type,
           size: { width: 350, height: 350 },
           price: item.price.dollar || 300,
         });
-      });
+      }
 
       // console.log("Loaded plates:", this.plates);
       // 模擬API調用
@@ -101,7 +102,7 @@ export const useDesignStore = defineStore("design", {
       this.patterns = [];
       const response = await GetPatterns();
       // console.log("Loaded patterns:", response.items);
-      response.items.forEach((item: any) => {
+      for (const item of response.items) {
         this.patterns.push({
           id: item.id,
           name_en: item.title_translations["en"],
@@ -109,11 +110,12 @@ export const useDesignStore = defineStore("design", {
           price: item.price.dollar || 0,
           type: item.type,
           category: item.category_id,
-          image: item.medias?.[0]?.images.source.url || "",
+          // image: item.medias?.[0]?.images.source.url || "",
+          image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
           size: { width: 30, height: 30 },
           defaultSize: 50,
         });
-      });
+      }
 
       // 模擬圖案數據
       // this.patterns = [
@@ -160,6 +162,23 @@ export const useDesignStore = defineStore("design", {
       //   },
       // ];
     },
+
+    // async finishDesign() {
+    //   const response = await AddToCart();
+    // },
+
+    // async urlToBase64(url: string) {
+    //   const proxyUrl = `/image-proxy/${url.replace("https//img.shoplineapp.com/", "")}`;
+    //   const response = await fetch(url);
+    //   console.log(response);
+    //   // const blob = await response.blob();
+    //   // return new Promise((resolve, reject) => {
+    //   //   const reader = new FileReader();
+    //   //   reader.onloadend = () => resolve(reader.result);
+    //   //   reader.onerror = reject;
+    //   //   reader.readAsDataURL(blob);
+    //   // });
+    // },
 
     selectPlate(plateId: string) {
       const plate = this.getPlateById(plateId);
@@ -381,9 +400,9 @@ export const useDesignStore = defineStore("design", {
       // alert(`設計已匯出為 JSON 檔案: plate-design-${this.designId}.json`);
     },
 
-    // printDesign() {
-    //   window.print()
-    // }
+    printDesign() {
+      window.print();
+    },
 
     // updatePatternSize(index: number, width: number, height: number) {
     //   if (index >= 0 && index < this.patterns.length) {

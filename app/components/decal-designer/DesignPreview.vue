@@ -69,13 +69,21 @@
 
     <div class="preview-controls">
       <!-- <button class="btn btn-primary" @click="shareDesign"><i class="fas fa-share-alt"></i> 分享設計</button> -->
-      <el-button @click="designStore.resetPlate">
+      <!-- <el-button @click="designStore.exportDesign">
+        <Icon name="material-symbols:download-rounded" class="text-[20px] mr-1" />
+        下載圖片
+      </el-button> -->
+      <el-button @click="downloadImage">
         <Icon name="material-symbols:download-rounded" class="text-[20px] mr-1" />
         下載圖片
       </el-button>
       <el-button @click="printDesign">
         <Icon name="material-symbols:print-rounded" class="text-[20px] mr-1" />
         列印設計
+      </el-button>
+      <el-button @click="finishDesign">
+        <Icon name="material-symbols:print-rounded" class="text-[20px] mr-1" />
+        設計完成
       </el-button>
       <!-- <button class="btn btn-secondary" @click="downloadImage"><i class="fas fa-image"></i> 下載圖片</button> -->
       <!-- <button class="btn btn-secondary" @click="printDesign"><i class="fas fa-print"></i> 列印設計</button> -->
@@ -256,47 +264,47 @@ const getPatternSize = (patternId: string) => {
 // };
 
 // const downloadImage = () => {
-//   ElMessage.info("圖片下載功能需配合 html2canvas 等庫實現");
-//   // 實際實現：
+//   // ElMessage.info("圖片下載功能需配合 html2canvas 等庫實現");
+//   // // 實際實現：
 //   // import html2canvas from 'html2canvas'
-//   // const plateElement = document.querySelector('.preview-plate')
-//   // if (plateElement) {
-//   //   html2canvas(plateElement).then(canvas => {
-//   //     const link = document.createElement('a')
-//   //     link.download = `plate-design-${designStore.designId}.png`
-//   //     link.href = canvas.toDataURL('image/png')
-//   //     link.click()
-//   //   })
-//   // }
+//   const plateElement = document.querySelector('.preview-plate') as HTMLElement
+//   if (plateElement) {
+//     html2canvas(plateElement).then(canvas => {
+//       const link = document.createElement('a')
+//       link.download = `plate-design-${designStore.designId}.png`
+//       link.href = canvas.toDataURL('image/png')
+//       link.click()
+//     })
+//   }
 // };
 const isDownloading = ref(false);
 const isPrinting = ref(false);
 
-const preloadImages = async (element: Element) => {
-  // 找出所有有背景圖片的元素
-  const elementsWithBg = element.querySelectorAll('[style*="background-image"]');
-  const promises: any = [];
+// const preloadImages = async (element: Element) => {
+//   // 找出所有有背景圖片的元素
+//   const elementsWithBg = element.querySelectorAll('[style*="background-image"]');
+//   const promises: any = [];
 
-  elementsWithBg.forEach((el: Element) => {
-    const style = window.getComputedStyle(el);
-    const bgImage = style.backgroundImage;
-    if (bgImage && bgImage !== "none") {
-      const url = bgImage.replace(/^url\(["']?|["']?\)$/g, "");
-      if (url) {
-        const promise = new Promise((resolve, reject) => {
-          const img = new Image();
-          img.crossOrigin = "anonymous";
-          img.onload = resolve;
-          img.onerror = reject;
-          img.src = url;
-        });
-        promises.push(promise);
-      }
-    }
-  });
+//   elementsWithBg.forEach((el: Element) => {
+//     const style = window.getComputedStyle(el);
+//     const bgImage = style.backgroundImage;
+//     if (bgImage && bgImage !== "none") {
+//       const url = bgImage.replace(/^url\(["']?|["']?\)$/g, "");
+//       if (url) {
+//         const promise = new Promise((resolve, reject) => {
+//           const img = new Image();
+//           img.crossOrigin = "anonymous";
+//           img.onload = resolve;
+//           img.onerror = reject;
+//           img.src = url;
+//         });
+//         promises.push(promise);
+//       }
+//     }
+//   });
 
-  await Promise.all(promises);
-};
+//   await Promise.all(promises);
+// };
 
 const downloadImage = async () => {
   if (!process.client) return;
@@ -310,10 +318,11 @@ const downloadImage = async () => {
     ElMessage.info("正在生成圖片，請稍候...");
 
     // 預加載所有圖片
-    await preloadImages(element);
+    // await preloadImages(element);
 
     // 生成圖片
-    const canvas = await html2canvas(element, {
+    // const canvas = await html2canvas(element, {
+    const canvas = await html2canvas(printContainerRef.value, {
       scale: 2, // 2倍解析度
       backgroundColor: "#ffffff",
       allowTaint: false,
@@ -336,6 +345,11 @@ const downloadImage = async () => {
   } finally {
     isDownloading.value = false;
   }
+};
+
+const finishDesign = () => {
+  ElMessage.success("感謝您的設計！我們將盡快與您聯繫確認訂單細節。");
+  designStore.finishDesign();
 };
 
 // 列印設計
@@ -394,56 +408,57 @@ const printDesign = async () => {
     // const canvas = await html2canvas(printContent);
 
     // 獲取設備像素比
-    const dpr = window.devicePixelRatio || 3;
+    // const dpr = window.devicePixelRatio || 3;
     // 獲取元素實際尺寸
     const rect = printContent.getBoundingClientRect();
 
     const canvas = await html2canvas(printContent, {
-      scale: 3, // 提高解析度
-      backgroundColor: null, // 保留透明背景
+      scale: 2, // 提高解析度
+      // backgroundColor: null, // 保留透明背景
       allowTaint: false,
       useCORS: true, // 允許跨域圖片
-      logging: false,
+      // logging: false,
       // width: rect.width,
       // height: rect.height,
-      width: printContent.scrollWidth,
-      height: printContent.scrollHeight,
-      windowHeight: rect.height,
+      // width: printContent.scrollWidth,
+      // height: printContent.scrollHeight,
+      // windowHeight: rect.height,
       onclone: (clonedDoc, clonedElement) => {
         const clonedIcons = clonedDoc.querySelectorAll(".plate-pattern-container");
         clonedIcons.forEach((icon: any) => {
-          icon.style.width = icon.clientWidth * 2.5 + "px";
-          icon.style.height = icon.clientHeight * 2.5 + "px";
+          icon.style.width = icon.clientWidth * 1 + "px";
+          icon.style.height = icon.clientHeight * 1 + "px";
           icon.style.backgroundSize = "contain";
         });
         // clonedDoc.documentElement.style.height = rect.height + "px";
         // 在克隆的文件中強制保留背景
         // clonedElement.style.width = rect.width + "px";
-        clonedElement.style.height = rect.height + "px";
-        clonedElement.style.webkitPrintColorAdjust = "exact";
+        // clonedElement.style.height = rect.height + "px";
+        (clonedElement.style as any).webkitPrintColorAdjust = "exact";
         clonedElement.style.printColorAdjust = "exact";
       },
     });
 
+    const rect_detail = printDetail.getBoundingClientRect();
     const canvas_detail = await html2canvas(printDetail, {
-      scale: 3, // 提高解析度
-      backgroundColor: null, // 保留透明背景
+      scale: 2, // 提高解析度
+      // backgroundColor: null, // 保留透明背景
       allowTaint: false,
       useCORS: true, // 允許跨域圖片
-      logging: false,
+      // logging: false,
       // windowWidth: printContainer.scrollWidth,
       // windowHeight: printContainer.scrollHeight,
-      onclone: (clonedDoc, clonedElement) => {
-        const clonedIcons = clonedDoc.querySelectorAll(".detail-item");
-        clonedIcons.forEach((item: any) => {
-          item.style.width = item.clientWidth * 2 + "px";
-          item.style.height = item.clientHeight * 1 + "px";
-          item.style.backgroundSize = "contain";
-        });
-        // 在克隆的文件中強制保留背景
-        clonedElement.style.webkitPrintColorAdjust = "exact";
-        clonedElement.style.printColorAdjust = "exact";
-      },
+      // onclone: (clonedDoc, clonedElement) => {
+      //   const clonedIcons = clonedDoc.querySelectorAll(".detail-item");
+      //   clonedIcons.forEach((item: any) => {
+      //     item.style.width = item.clientWidth * 1 + "px";
+      //     item.style.height = item.clientHeight * 1 + "px";
+      //     item.style.backgroundSize = "contain";
+      //   });
+      //   // 在克隆的文件中強制保留背景
+      //   (clonedElement.style as any).webkitPrintColorAdjust = "exact";
+      //   clonedElement.style.printColorAdjust = "exact";
+      // },
     });
 
     const design_image = canvas.toDataURL("image/png");
@@ -487,8 +502,8 @@ const printDesign = async () => {
             </head>
             <body>
               <div>
-                <img src="${design_image}" style="width: ${rect.width}px; margin: 0 auto; margin-top:20px; height: 500px; display: flex;" />
-                <img src="${design_detail}" style="width: ${rect.width}px; margin: 0 auto; margin-top:10px; height: auto;" /> 
+                <img src="${design_image}" style="width: ${rect.width}px; margin: 0 auto; margin-top:20px; display: flex;" />
+                <img src="${design_detail}" style="width: ${rect_detail.width}px; margin: 0 auto; margin-top:10px; display: flex;" /> 
               </div>
             </body>
           </html>

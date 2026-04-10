@@ -36,8 +36,8 @@
               top: pattern.y + 'px',
               transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
               fontSize: getPatternSize(pattern.patternId) + 'px',
-              width: pattern.size.width* 2 + 'px',
-              height: pattern.size.height* 2 + 'px',
+              // width: pattern.size.width* 2 + 'px',
+              // height: pattern.size.height* 2 + 'px',
             }"
             @mousedown="startDrag(pattern.id, $event)"
             @click="selectPatternOnPlate(pattern.id)"
@@ -46,8 +46,8 @@
               class="pattern-item"
               v-html="getPatternSvg(pattern.patternId)"
               :style="{
-                width: pattern.size.width * 2 + 'px',
-                height: pattern.size.height * 2 + 'px',
+                'max-width': pattern.size.width * 2 + 'px',
+                'max-height': pattern.size.height * 2 + 'px',
               }"
             />
             <div class="pattern-controls">

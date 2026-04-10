@@ -68,6 +68,8 @@ const placedPatterns = computed(() => designStore.placedPatterns);
 const filteredPatterns = computed(() => {
   let filtered = [...patterns.value];
 
+  console.log("All patterns:", filtered);
+
   // 分類過濾
   if (activeCategory.value !== "all") {
     filtered = filtered.filter((pattern) => pattern.category === activeCategory.value);

@@ -57,3 +57,45 @@ export async function GetPatterns() {
   }
   return data.value;
 }
+
+// Get image data as blob and convert to object URL for preview
+export async function GetImage(url: string) {
+  const { data, error } = await useFetch<any>(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${auth_token}`,
+    },
+  });
+  if (error.value) {
+    console.error("Error fetching patterns:", error.value);
+    throw new Error("Failed to fetch patterns");
+  }
+  const blob = data.value
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onloadend = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
+
+export async function AddToCart() {
+  // const { data, error } = await useFetch<any>(`${BASE_URL}/storefront-api/v1/carts/{cart_id}/items`, {
+  const { data, error } = await useFetch<any>(`${BASE_URL}/carts/{cart_id}/items`, {
+    method: "POST",
+    query: {
+      category_id: pattern_id,
+    },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${auth_token}`,
+    },
+  });
+
+  if (error.value) {
+    console.error("Error fetching patterns:", error.value);
+    throw new Error("Failed to fetch patterns");
+  }
+  return data.value;
+}

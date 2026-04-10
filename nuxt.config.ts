@@ -10,11 +10,10 @@ export default defineNuxtConfig({
 
   devtools: { enabled: true },
 
-  // devServer: {
-  //   host: "0.0.0.0",
-  //   port: 3000,
-  // },
-
+  devServer: {
+    host: "0.0.0.0",
+    port: 3000,
+  },
 
   // generate: {
   //   routes: ["/"], // 只生成首页
@@ -23,8 +22,6 @@ export default defineNuxtConfig({
   // build: {
   //   publicPath: "./_nuxt/", // 注意：Nuxt 3 中可能需要额外配置
   // },
-
-  
 
   // 启用 TypeScript 和 JSX 支持
   typescript: {
@@ -43,8 +40,6 @@ export default defineNuxtConfig({
   modules: ["@nuxt/devtools", "@nuxt/ui", "@element-plus/nuxt", "@pinia/nuxt", "@nuxtjs/i18n", "dayjs-nuxt", "nuxt-svgo"],
 
   css: ["element-plus/dist/index.css", "~/assets/index.scss", "~/assets/css/main.css"],
-
-  
 
   // // UnoCSS 配置
   // unocss: {
@@ -111,6 +106,19 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    routeRules: {
+      // 将所有以 /image-proxy/ 开头的请求代理到目标图片服务器
+      "/image-proxy/**": {
+        proxy: "https//img.shoplineapp.com/**",
+      },
+    },
+    // server: {
+    //   cors: {
+    //     origin: ['http://localhost:3000', 'http://192.168.0.244:3000/maos-admin'],
+    //     methods: ['GET', 'OPTIONS'],
+    //     allowedHeaders: ['*']
+    //   }
+    // },
     // preset: "github_pages", // 為GitHub Pages做優化打包
     prerender: {
       // routes: ["/"], // 指定要預渲染 (prerender)的頁面
