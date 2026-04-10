@@ -106,12 +106,12 @@ export default defineNuxtConfig({
   },
 
   nitro: {
-    routeRules: {
-      // 将所有以 /image-proxy/ 开头的请求代理到目标图片服务器
-      "/image-proxy/**": {
-        proxy: "https//img.shoplineapp.com/**",
-      },
-    },
+    // routeRules: {
+    //   // 将所有以 /image-proxy/ 开头的请求代理到目标图片服务器
+    //   "/image-proxy/**": {
+    //     proxy: "https//img.shoplineapp.com/**",
+    //   },
+    // },
     // server: {
     //   cors: {
     //     origin: ['http://localhost:3000', 'http://192.168.0.244:3000/maos-admin'],
