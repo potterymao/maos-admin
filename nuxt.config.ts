@@ -8,12 +8,12 @@ export default defineNuxtConfig({
   // SSR (SEO)
   ssr: true, // 关闭服务器端渲染，启用客户端渲染
 
-  devtools: { enabled: true },
+  // devtools: { enabled: true },
 
-  devServer: {
-    host: "0.0.0.0",
-    port: 3000,
-  },
+  // devServer: {
+  //   host: "0.0.0.0",
+  //   port: 3000,
+  // },
 
   // generate: {
   //   routes: ["/"], // 只生成首页
