@@ -54,7 +54,7 @@ designStore.loadPatterns();
 // 分類選項
 const categories = ref<SelectMenuItem[]>([
   { key: "all", label: $t("patterns.all") },
-  { key: "flower", label: $t("patterns.flowers") },
+  { key: "flowers", label: $t("patterns.flowers") },
   { key: "animal", label: $t("patterns.animals") },
   { key: "geometric", label: $t("patterns.geometrics") },
 ]);
@@ -62,11 +62,11 @@ const activeCategory = ref("all");
 
 // 計算屬性
 const patterns = computed(() => designStore.patterns);
-const placedPatterns = computed(() => designStore.placedPatterns);
+// const placedPatterns = computed(() => designStore.placedPatterns);
 
 // 過濾圖案
 const filteredPatterns = computed(() => {
-  let filtered = [...patterns.value];
+  let filtered = patterns.value;
 
   console.log("All patterns:", filtered);
 
