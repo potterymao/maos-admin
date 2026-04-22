@@ -336,62 +336,62 @@ const rotatePattern = (patternId: string) => {
   }
 };
 
-const updatePatternPosition = (patternId: string, x: number, y: number) => {
-  designStore.updatePatternPosition(patternId, x, y);
-};
+// const updatePatternPosition = (patternId: string, x: number, y: number) => {
+//   designStore.updatePatternPosition(patternId, x, y);
+// };
 
-const updatePatternRotation = (patternId: string, rotation: number) => {
-  designStore.updatePatternRotation(patternId, rotation);
-};
+// const updatePatternRotation = (patternId: string, rotation: number) => {
+//   designStore.updatePatternRotation(patternId, rotation);
+// };
 
-const updatePatternScale = (patternId: string, scale: number) => {
-  designStore.updatePatternScale(patternId, scale);
-};
+// const updatePatternScale = (patternId: string, scale: number) => {
+//   designStore.updatePatternScale(patternId, scale);
+// };
 
-const selectPattern = (patternId: string) => {
-  designStore.selectPattern(patternId);
-};
+// const selectPattern = (patternId: string) => {
+//   designStore.selectPattern(patternId);
+// };
 
 // const deletePattern = (patternId: string) => {
 //   designStore.removePattern(patternId);
 // };
 
-const deleteSelectedPattern = () => {
-  if (selectedPattern.value) {
-    designStore.removePattern(selectedPattern.value.id);
-  }
-};
+// const deleteSelectedPattern = () => {
+//   if (selectedPattern.value) {
+//     designStore.removePattern(selectedPattern.value.id);
+//   }
+// };
 
-const updateSelectedRotation = (value: number) => {
-  if (selectedPattern.value) {
-    designStore.updatePatternRotation(selectedPattern.value.id, value);
-  }
-};
+// const updateSelectedRotation = (value: number) => {
+//   if (selectedPattern.value) {
+//     designStore.updatePatternRotation(selectedPattern.value.id, value);
+//   }
+// };
 
-const updateSelectedScale = (value: number) => {
-  if (selectedPattern.value) {
-    designStore.updatePatternScale(selectedPattern.value.id, value);
-  }
-};
+// const updateSelectedScale = (value: number) => {
+//   if (selectedPattern.value) {
+//     designStore.updatePatternScale(selectedPattern.value.id, value);
+//   }
+// };
 
-const updateBackground = (color: string | null) => {
-  if (color) {
-    designStore.setBackgroundColor(color);
-  }
-};
+// const updateBackground = (color: string | null) => {
+//   if (color) {
+//     designStore.setBackgroundColor(color);
+//   }
+// };
 
-const clearAll = () => {
-  designStore.clearAllPatterns();
-};
+// const clearAll = () => {
+//   designStore.clearAllPatterns();
+// };
 
-const deselectAll = () => {
-  designStore.selectPattern("");
-};
+// const deselectAll = () => {
+//   designStore.selectPattern("");
+// };
 
-const saveDesign = () => {
-  const design = designStore.saveDesign();
-  ElMessage.success("設計已保存！");
-};
+// const saveDesign = () => {
+//   const design = designStore.saveDesign();
+//   ElMessage.success("設計已保存！");
+// };
 
 // 初始化
 // designStore.loadPlates();

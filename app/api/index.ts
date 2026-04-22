@@ -5,8 +5,31 @@ const auth_token = "2f02e2666086ad2bfe21a1ecaff1d6ffbfef1acdb377206570a70275deb6
 const plate_id = "69a91f41436917d8cc011bac";
 const pattern_id = "69a91f9a1936bba5ce715660";
 
+// const designStore = useDesignStore();
+
 // const getPlateFields = ref(["items.id", "items.title_translations", "items.lowest_price", "items.medias"]);
 // const getPatternFields = ref(["items.id", "items.title_translations", "items.lowest_price"]);
+// export const useFetchPatterns = () => {
+export async function useFetchPatterns() {
+  // const designStore = useDesignStore();
+  // const { data, pending, error } = useAsyncData('user', () => $fetch('/api/user'))
+  const { data, pending, error } = useFetch<any>(`${BASE_URL}/products/search`, {
+    method: "GET",
+    query: {
+      category_id: pattern_id,
+    },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${auth_token}`,
+    },
+  });
+  if (data.value) {
+
+  }
+
+  // if (data.value) designStore.SetPatterns(data.value);
+  // return { pending, error };
+}
 
 export async function GetPlates() {
   // try {
@@ -55,6 +78,7 @@ export async function GetPatterns() {
     console.error("Error fetching patterns:", error.value);
     throw new Error("Failed to fetch patterns");
   }
+  // designStore.SetPatterns(data.value);
   return data.value;
 }
 
@@ -71,13 +95,13 @@ export async function GetImage(url: string) {
     console.error("Error fetching patterns:", error.value);
     throw new Error("Failed to fetch patterns");
   }
-  const blob = data.value
+  const blob = data.value;
   return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onloadend = () => resolve(reader.result)
-    reader.onerror = reject
-    reader.readAsDataURL(blob)
-  })
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
 export async function AddToCart() {

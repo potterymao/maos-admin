@@ -33,6 +33,12 @@ export const useDesignStore = defineStore("design", {
   },
 
   actions: {
+    // Get Plates
+    SetPatterns(data: any) {
+      // console.log("Setting patterns:", data);
+      this.patterns = data
+    },
+
     // Get Plates API
     async loadPlates() {
       this.plates = [];

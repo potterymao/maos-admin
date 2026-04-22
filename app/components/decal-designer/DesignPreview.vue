@@ -221,6 +221,8 @@
 <script setup lang="ts">
 import html2canvas from "html2canvas-pro";
 
+import { useFetchPatterns, GetPatterns } from "@/api";
+
 const appStore = useAppStore();
 const designStore = useDesignStore();
 
@@ -233,6 +235,16 @@ const getImageUrl = (imagePath: string) => {
   }
   return imagePath;
 };
+
+// const getPatterns = async () => {
+//   const response = await GetPatterns();
+//   if(response && response.items) {
+//     designStore.SetPatterns(response);
+//   }
+// // //   console.log("Fetched patterns:", response);
+// // //   // return response;
+// };
+// getPatterns();
 
 // 計算圖案尺寸
 const getPatternSize = (patternId: string) => {

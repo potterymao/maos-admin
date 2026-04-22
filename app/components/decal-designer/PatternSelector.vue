@@ -2,7 +2,7 @@
   <div class="panel">
     <h2 class="design-panel-title">
       <Icon name="material-symbols:category-rounded" class="text-blue-500 text-[28px]" />
-      {{ $t('_designer.selectPattern')}}
+      {{ $t("_designer.selectPattern") }}
     </h2>
 
     <USelectMenu v-model="activeCategory" :items="categories" value-key="key" class="w-full mb-4" />
@@ -10,9 +10,9 @@
     <div class="patterns-grid">
       <div v-for="pattern in filteredPatterns" :key="pattern.id" class="pattern-card" @click="addPattern(pattern.id)" @dragstart="onDragStart(pattern, $event)" draggable="true">
         <!-- <div class="pattern-thumbnail" v-html="pattern.svg" /> -->
-         <div class="pattern-img">
+        <div class="pattern-img">
           <img :src="pattern.image" :alt="pattern.name" class="w-full h-full object-contain" />
-         </div>
+        </div>
         <!-- <img :src="pattern.image" :alt="pattern.name" class="pattern-img" /> -->
         <div class="pattern-info">
           <span class="pattern-name">{{ appStore.locale === "zh-TW" ? pattern.name_zh : pattern.name_en }}</span>
@@ -44,12 +44,28 @@
 </template>
 
 <script setup lang="ts">
+// import { onMounted } from "vue";
 import type { SelectMenuItem } from "@nuxt/ui";
-// import { GetPatterns } from "@/api"
+import { useFetchPatterns, GetPatterns, GetImage } from "@/api";
+
 const appStore = useAppStore();
 const designStore = useDesignStore();
+// const { patterns } = storeToRefs(designStore)
+// onMounted(async () => {
+//   await useFetchPatterns();
+// });
 
-designStore.loadPatterns();
+// designStore.loadPatterns();
+// useFetchPatterns();
+
+// watch(
+//   () => designStore.patterns,
+//   (newPatterns) => {
+//     // console.log("Patterns updated in store:", newPatterns);
+//     patterns.value = newPatterns;
+//   },
+//   { deep: true }
+// );
 
 // 分類選項
 const categories = ref<SelectMenuItem[]>([
@@ -61,18 +77,42 @@ const categories = ref<SelectMenuItem[]>([
 const activeCategory = ref("all");
 
 // 計算屬性
-const patterns = computed(() => designStore.patterns);
+const patterns = ref([]);
+// const patterns = computed(() => designStore.patterns);
 // const placedPatterns = computed(() => designStore.placedPatterns);
+
+const getPatterns = async () => {
+  let patternsData: any = [];
+  const response = await GetPatterns();
+  if (response && response.items) {
+    for (const item of response.items) {
+      patternsData.push({
+        id: item.id,
+        name_en: item.title_translations["en"],
+        name_zh: item.title_translations["zh-hant"],
+        price: item.price.dollar || 0,
+        type: item.type,
+        category: item.category_id,
+        // image: item.medias?.[0]?.images.source.url || "",
+        image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
+        size: { width: 30, height: 30 },
+        defaultSize: 50,
+      });
+    }
+    patterns.value = patternsData; // 直接更新本地 patterns 變數
+    designStore.SetPatterns(patternsData);
+  }
+};
 
 // 過濾圖案
 const filteredPatterns = computed(() => {
-  let filtered = patterns.value;
+  let filtered = patterns.value || [];
 
   console.log("All patterns:", filtered);
 
   // 分類過濾
   if (activeCategory.value !== "all") {
-    filtered = filtered.filter((pattern) => pattern.category === activeCategory.value);
+    filtered = filtered.filter((pattern: any) => pattern.category === activeCategory.value);
   }
 
   return filtered;
@@ -90,13 +130,7 @@ const onDragStart = (pattern: any, event: DragEvent) => {
   }
 };
 
-
-// const getPatterns = async () => {
-//   const response = await GetPatterns();
-//   console.log("Fetched patterns:", response);
-//   // return response;
-// };
-// getPatterns();
+getPatterns();
 </script>
 
 <style scoped>
