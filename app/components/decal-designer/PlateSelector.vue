@@ -26,13 +26,37 @@
 </template>
 
 <script setup lang="ts">
+import { GetPlates, GetImage } from "@/api";
 // import IconPlate from "@/assets/images/svg/plate.svg";
 const appStore = useAppStore();
 const designStore = useDesignStore();
 
-designStore.loadPlates();
+// designStore.loadPlates();
 
-const plates = computed(() => designStore.plates);
+// const plates = computed(() => designStore.plates);
+const plates = ref([]);
+// 獲取圖案列表
+const getPlates = async () => {
+  let platesData: any = [];
+  const response = await GetPlates();
+  if (response && response.items) {
+    for (const item of response.items) {
+      platesData.push({
+        id: item.id,
+        name_en: item.title_translations.en,
+        name_zh: item.title_translations["zh-hant"],
+        // image: item.medias?.[0]?.images.source.url || "",
+        image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
+        type: item.type,
+        size: { width: 350, height: 350 },
+        price: item.price.dollar || 300,
+      });
+    }
+    plates.value = platesData; // 直接更新本地 patterns 變數
+    designStore.SetPlates(platesData);
+  }
+};
+getPlates();
 </script>
 
 <style lang="scss" scoped>

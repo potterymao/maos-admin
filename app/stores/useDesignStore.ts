@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { GetPlates, GetPatterns, GetImage } from "@/api";
+import { GetPlates, GetImage } from "@/api";
 import type { Plate, PlateDesign, PlateStyle, Pattern, PlacedPattern, DesignState } from "~~/types";
 
 export const useDesignStore = defineStore("design", {
@@ -34,67 +34,9 @@ export const useDesignStore = defineStore("design", {
 
   actions: {
     // Get Plates
-    SetPatterns(data: any) {
-      // console.log("Setting patterns:", data);
-      this.patterns = data
-    },
-
-    // Get Plates API
-    async loadPlates() {
-      this.plates = [];
-      this.currentPlate = null;
-      const response = await GetPlates();
-      // console.log("Loaded plates:", response.items);
-      for (const item of response.items) {
-        this.plates.push({
-          id: item.id,
-          name_en: item.title_translations.en,
-          name_zh: item.title_translations["zh-hant"],
-          // image: item.medias?.[0]?.images.source.url || "",
-          image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
-          type: item.type,
-          size: { width: 350, height: 350 },
-          price: item.price.dollar || 300,
-        });
-      }
-
-      // console.log("Loaded plates:", this.plates);
-      // 模擬API調用
-      // this.plates = [
-      //   {
-      //     id: "1",
-      //     name: "經典白瓷",
-      //     type: "white",
-      //     size: { width: 300, height: 300 },
-      //     icon: "i-mdi-circle",
-      //     iconColor: "#f0f0f0",
-      //     color: "#ffffff",
-      //     shadowColor: "rgba(0,0,0,0.1)",
-      //     price: 199,
-      //   },
-      //   {
-      //     id: "2",
-      //     name: "粉色瓷盤",
-      //     type: "pink",
-      //     icon: "i-mdi-circle",
-      //     iconColor: "#f48fb1",
-      //     color: "#f8bbd0",
-      //     shadowColor: "rgba(244,143,177,0.3)",
-      //     size: { width: 290, height: 290 },
-      //     price: 189,
-      //   },
-      //   {
-      //     id: "3",
-      //     name: "金色邊盤",
-      //     type: "golden",
-      //     icon: "i-mdi-circle-outline",
-      //     iconColor: "#ffd54f",
-      //     color: "#fff9c4",
-      //     shadowColor: "rgba(255,213,79,0.3)",
-      //     size: { width: 350, height: 350 },
-      //     price: 299,
-      //   },
-      // ];
+    SetPlates(data: any) {
+      // console.log("Setting plates:", data);
+      this.plates = data;
 
       if (this.plates.length > 0 && !this.currentPlate) {
         if (this.plates[0]) {
@@ -103,71 +45,141 @@ export const useDesignStore = defineStore("design", {
       }
     },
 
-    // Get Patterns API
-    async loadPatterns() {
-      this.patterns = [];
-      const response = await GetPatterns();
-      // console.log("Loaded patterns:", response.items);
-      for (const item of response.items) {
-        this.patterns.push({
-          id: item.id,
-          name_en: item.title_translations["en"],
-          name_zh: item.title_translations["zh-hant"],
-          price: item.price.dollar || 0,
-          type: item.type,
-          category: item.category_id,
-          // image: item.medias?.[0]?.images.source.url || "",
-          image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
-          size: { width: 30, height: 30 },
-          defaultSize: 50,
-        });
-      }
-
-      // 模擬圖案數據
-      // this.patterns = [
-      //   {
-      //     id: "p1",
-      //     name: "花朵",
-      //     category: "flower",
-      //     // image: "/patterns/flower.svg",
-      //     size: { width: 40, height: 40 },
-      //     // svg: '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#FF6B6B"/></svg>',
-      //     defaultSize: 50,
-      //     price: 50,
-      //     // color: "#FF6B6B",
-      //   },
-      //   {
-      //     id: "p2",
-      //     name: "幾何圖形",
-      //     category: "geometric",
-      //     image: "/patterns/star.svg",
-      //     size: { width: 30, height: 30 },
-      //     // svg: '<svg viewBox="0 0 100 100"><polygon points="50,5 95,35 95,85 50,115 5,85 5,35" fill="#4ECDC4"/></svg>',
-      //     defaultSize: 50,
-      //     price: 50,
-      //   },
-      //   {
-      //     id: "p3",
-      //     name: "動物圖案",
-      //     category: "animal",
-      //     image: "/patterns/animal.svg",
-      //     size: { width: 20, height: 40 },
-      //     // svg: '<svg viewBox="0 0 100 100"><path d="M50,20 Q70,30 80,50 Q70,70 50,80 Q30,70 20,50 Q30,30 50,20" fill="#FFD166"/></svg>',
-      //     defaultSize: 50,
-      //     price: 50,
-      //   },
-      //   {
-      //     id: "p4",
-      //     name: "愛心",
-      //     category: "heart",
-      //     image: "/patterns/heart.svg",
-      //     size: { width: 20, height: 40 },
-      //     // svg: '<svg viewBox="0 0 100 100"><path d="M50,20 Q70,30 80,50 Q70,70 50,80 Q30,70 20,50 Q30,30 50,20" fill="#FFD166"/></svg>',
-      //     defaultSize: 50,
-      //     price: 50,
-      //   },
-      // ];
+    // Get Patterns
+    SetPatterns(data: any) {
+      // console.log("Setting patterns:", data);
+      this.patterns = data;
     },
+
+    // Get Plates API
+    // async loadPlates() {
+    //   this.plates = [];
+    //   this.currentPlate = null;
+    //   const response = await GetPlates();
+    //   // console.log("Loaded plates:", response.items);
+    //   for (const item of response.items) {
+    //     this.plates.push({
+    //       id: item.id,
+    //       name_en: item.title_translations.en,
+    //       name_zh: item.title_translations["zh-hant"],
+    //       // image: item.medias?.[0]?.images.source.url || "",
+    //       image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
+    //       type: item.type,
+    //       size: { width: 350, height: 350 },
+    //       price: item.price.dollar || 300,
+    //     });
+    //   }
+
+    //   // console.log("Loaded plates:", this.plates);
+    //   // 模擬API調用
+    //   // this.plates = [
+    //   //   {
+    //   //     id: "1",
+    //   //     name: "經典白瓷",
+    //   //     type: "white",
+    //   //     size: { width: 300, height: 300 },
+    //   //     icon: "i-mdi-circle",
+    //   //     iconColor: "#f0f0f0",
+    //   //     color: "#ffffff",
+    //   //     shadowColor: "rgba(0,0,0,0.1)",
+    //   //     price: 199,
+    //   //   },
+    //   //   {
+    //   //     id: "2",
+    //   //     name: "粉色瓷盤",
+    //   //     type: "pink",
+    //   //     icon: "i-mdi-circle",
+    //   //     iconColor: "#f48fb1",
+    //   //     color: "#f8bbd0",
+    //   //     shadowColor: "rgba(244,143,177,0.3)",
+    //   //     size: { width: 290, height: 290 },
+    //   //     price: 189,
+    //   //   },
+    //   //   {
+    //   //     id: "3",
+    //   //     name: "金色邊盤",
+    //   //     type: "golden",
+    //   //     icon: "i-mdi-circle-outline",
+    //   //     iconColor: "#ffd54f",
+    //   //     color: "#fff9c4",
+    //   //     shadowColor: "rgba(255,213,79,0.3)",
+    //   //     size: { width: 350, height: 350 },
+    //   //     price: 299,
+    //   //   },
+    //   // ];
+
+    //   if (this.plates.length > 0 && !this.currentPlate) {
+    //     if (this.plates[0]) {
+    //       this.currentPlate = this.plates[0];
+    //     }
+    //   }
+    // },
+
+    // Get Patterns API
+    // async loadPatterns() {
+    //   this.patterns = [];
+    //   const response = await GetPatterns();
+    //   // console.log("Loaded patterns:", response.items);
+    //   for (const item of response.items) {
+    //     this.patterns.push({
+    //       id: item.id,
+    //       name_en: item.title_translations["en"],
+    //       name_zh: item.title_translations["zh-hant"],
+    //       price: item.price.dollar || 0,
+    //       type: item.type,
+    //       category: item.category_id,
+    //       // image: item.medias?.[0]?.images.source.url || "",
+    //       image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
+    //       size: { width: 30, height: 30 },
+    //       defaultSize: 50,
+    //     });
+    //   }
+
+    //   // 模擬圖案數據
+    //   // this.patterns = [
+    //   //   {
+    //   //     id: "p1",
+    //   //     name: "花朵",
+    //   //     category: "flower",
+    //   //     // image: "/patterns/flower.svg",
+    //   //     size: { width: 40, height: 40 },
+    //   //     // svg: '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#FF6B6B"/></svg>',
+    //   //     defaultSize: 50,
+    //   //     price: 50,
+    //   //     // color: "#FF6B6B",
+    //   //   },
+    //   //   {
+    //   //     id: "p2",
+    //   //     name: "幾何圖形",
+    //   //     category: "geometric",
+    //   //     image: "/patterns/star.svg",
+    //   //     size: { width: 30, height: 30 },
+    //   //     // svg: '<svg viewBox="0 0 100 100"><polygon points="50,5 95,35 95,85 50,115 5,85 5,35" fill="#4ECDC4"/></svg>',
+    //   //     defaultSize: 50,
+    //   //     price: 50,
+    //   //   },
+    //   //   {
+    //   //     id: "p3",
+    //   //     name: "動物圖案",
+    //   //     category: "animal",
+    //   //     image: "/patterns/animal.svg",
+    //   //     size: { width: 20, height: 40 },
+    //   //     // svg: '<svg viewBox="0 0 100 100"><path d="M50,20 Q70,30 80,50 Q70,70 50,80 Q30,70 20,50 Q30,30 50,20" fill="#FFD166"/></svg>',
+    //   //     defaultSize: 50,
+    //   //     price: 50,
+    //   //   },
+    //   //   {
+    //   //     id: "p4",
+    //   //     name: "愛心",
+    //   //     category: "heart",
+    //   //     image: "/patterns/heart.svg",
+    //   //     size: { width: 20, height: 40 },
+    //   //     // svg: '<svg viewBox="0 0 100 100"><path d="M50,20 Q70,30 80,50 Q70,70 50,80 Q30,70 20,50 Q30,30 50,20" fill="#FFD166"/></svg>',
+    //   //     defaultSize: 50,
+    //   //     price: 50,
+    //   //   },
+    //   // ];
+    // },
 
     // async finishDesign() {
     //   const response = await AddToCart();

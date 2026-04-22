@@ -46,7 +46,7 @@
 <script setup lang="ts">
 // import { onMounted } from "vue";
 import type { SelectMenuItem } from "@nuxt/ui";
-import { useFetchPatterns, GetPatterns, GetImage } from "@/api";
+import { GetPatterns, GetImage } from "@/api";
 
 const appStore = useAppStore();
 const designStore = useDesignStore();
@@ -81,6 +81,7 @@ const patterns = ref([]);
 // const patterns = computed(() => designStore.patterns);
 // const placedPatterns = computed(() => designStore.placedPatterns);
 
+// 獲取圖案列表
 const getPatterns = async () => {
   let patternsData: any = [];
   const response = await GetPatterns();
@@ -103,6 +104,7 @@ const getPatterns = async () => {
     designStore.SetPatterns(patternsData);
   }
 };
+getPatterns();
 
 // 過濾圖案
 const filteredPatterns = computed(() => {
@@ -129,8 +131,6 @@ const onDragStart = (pattern: any, event: DragEvent) => {
     event.dataTransfer.effectAllowed = "copy";
   }
 };
-
-getPatterns();
 </script>
 
 <style scoped>
