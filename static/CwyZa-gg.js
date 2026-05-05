@@ -1,0 +1,1 @@
+import{u as e}from"./BlkfCC_F.js";import{G as a,aU as o,c as t,o as r}from"./DPWNTMTI.js";const _=a({__name:"index",setup(n){return e().firstPage===""&&o("/designer/decal-designer"),(p,c)=>(r(),t("div"))}});export{_ as default};
