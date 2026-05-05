@@ -19,9 +19,9 @@
       </div>
 
       <!-- 中間：設計區域 -->
-      <div class="panel lg:w-3/5">
+      <div class="lg:w-3/5 space-y-6">
         <PlateSelector />
-        <PlateCanvas class="mt-6" />
+        <PlateCanvas />
         <!-- <div class="panel">
           <div class="flex flex-col items-center"> -->
         <!-- 盤子容器 -->

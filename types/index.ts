@@ -82,6 +82,7 @@ export interface Plate {
   color: string;
   shadowColor: string;
   price: number;
+  children: []
 }
 
 // 圖案類型

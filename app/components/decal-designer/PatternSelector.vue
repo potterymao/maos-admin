@@ -8,7 +8,8 @@
     <USelectMenu v-model="activeCategory" :items="categories" value-key="key" class="w-full mb-4" />
 
     <div class="patterns-grid">
-      <div v-for="pattern in filteredPatterns" :key="pattern.id" class="pattern-card" @click="addPattern(pattern.id)" @dragstart="onDragStart(pattern, $event)" draggable="true">
+      <div v-for="pattern in filteredPatterns" :key="pattern.id" class="pattern-card" @click="addPattern(pattern.id)"
+        @dragstart="onDragStart(pattern, $event)" draggable="true">
         <!-- <div class="pattern-thumbnail" v-html="pattern.svg" /> -->
         <div class="pattern-img">
           <img :src="pattern.image" :alt="pattern.name" class="w-full h-full object-contain" />
@@ -87,18 +88,34 @@ const getPatterns = async () => {
   const response = await GetPatterns();
   if (response && response.items) {
     for (const item of response.items) {
-      patternsData.push({
-        id: item.id,
-        name_en: item.title_translations["en"],
-        name_zh: item.title_translations["zh-hant"],
-        price: item.price.dollar || 0,
-        type: item.type,
-        category: item.category_id,
-        // image: item.medias?.[0]?.images.source.url || "",
-        image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
-        size: { width: 30, height: 30 },
-        defaultSize: 50,
-      });
+      if (item.variations && item.variations.length > 0) {
+        for (const [i, variation] of item.variations.entries()) {
+          patternsData.push({
+            id: variation.id,
+            name_en: item.variant_options[i].name_translations.en,
+            name_zh: item.variant_options[i].name_translations["zh-hant"],
+            image: variation.media?.images.source.url ? await GetImage(variation.media.images.source.url) : "",
+            price: variation.price.dollar || 0,
+            price_label: variation.price.label,
+            type: item.type,
+            // category: item.category_id,
+            size: { width: 50, height: 50 },
+            defaultSize: null,
+          })
+        }
+      }
+      // patternsData.push({
+      //   id: item.id,
+      //   name_en: item.title_translations["en"],
+      //   name_zh: item.title_translations["zh-hant"],
+      //   price: item.price.dollar || 0,
+      //   type: item.type,
+      //   category: item.category_id,
+      //   // image: item.medias?.[0]?.images.source.url || "",
+      //   image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
+      //   size: { width: 50, height: 50 },
+      //   defaultSize: null,
+      // });
     }
     patterns.value = patternsData; // 直接更新本地 patterns 變數
     designStore.SetPatterns(patternsData);

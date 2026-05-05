@@ -5,6 +5,7 @@ import type { Plate, PlateDesign, PlateStyle, Pattern, PlacedPattern, DesignStat
 export const useDesignStore = defineStore("design", {
   state: () => ({
     plates: [] as any[],
+    currentMainPlate: null as Plate | null,
     currentPlate: null as Plate | null,
     nextPatternId: 1,
     showPreview: false,
@@ -35,19 +36,17 @@ export const useDesignStore = defineStore("design", {
   actions: {
     // Get Plates
     SetPlates(data: any) {
-      // console.log("Setting plates:", data);
       this.plates = data;
 
       if (this.plates.length > 0 && !this.currentPlate) {
-        if (this.plates[0]) {
-          this.currentPlate = this.plates[0];
+        if (this.plates[0].children[0]) {
+          this.currentPlate = this.plates[0].children[0];
         }
       }
     },
 
     // Get Patterns
     SetPatterns(data: any) {
-      // console.log("Setting patterns:", data);
       this.patterns = data;
     },
 
@@ -197,11 +196,23 @@ export const useDesignStore = defineStore("design", {
     //   //   reader.readAsDataURL(blob);
     //   // });
     // },
-
-    selectPlate(plateId: string) {
+    selectMainPlate(plateId: string) {
       const plate = this.getPlateById(plateId);
       if (plate) {
-        this.currentPlate = plate;
+        this.currentMainPlate = plate;
+      }
+    },
+
+    selectPlate(plateId: string) {
+      // const plate = this.getPlateById(plateId);
+      // const plate = this.plates.find((item) => {
+      //   item.children.some((child: any) => child.id === plateId)
+      // })
+      if (this.currentMainPlate) {
+        const plate = this.currentMainPlate?.children.find(child => child.id === plateId) || null;
+        if (plate) {
+          this.currentPlate = plate;
+        }
       }
     },
 

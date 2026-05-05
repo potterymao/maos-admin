@@ -7,42 +7,112 @@
 
     <div class="final-preview mt-12" ref="printContainerRef">
       <div class="preview-container" ref="printContentRef">
-        <!-- <div class="preview-plate" :style="{ backgroundColor: currentPlate?.color }"> -->
-        <div class="preview-plate" :style="{ background: currentPlate?.image ? `url(${currentPlate.image}) no-repeat center / cover` : '#ffffff' }">
-          <!-- 預覽盤子上的圖案 -->
-          <div
-            v-for="pattern in placedPatterns"
-            :key="pattern.id + '-preview'"
-            class="plate-pattern-container"
-            :style="{
-              width: pattern.size.width * 1.8 + 'px',
-              height: pattern.size.height * 1.8 + 'px',
-              left: pattern.x / 1.4 + 'px',
-              top: pattern.y / 1.4 + 'px',
-              // transform: `rotate(${pattern.rotation}deg)`,
-              transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
-            }"
-          >
-            <div class="plate-pattern" :style="{ backgroundImage: `url(${pattern.image})` }"></div>
+        <div class="preview-plate" :style="{
+          width: currentPlate?.size.width  + 'px',
+          height: currentPlate?.size.height + 'px',
+          '-webkit-mask-image': currentPlate?.image ? `url(${currentPlate.image})` : 'none',
+          'mask-image': currentPlate?.image ? `url(${currentPlate.image})` : 'none',
+          '-webkit-mask-repeat': 'no-repeat',
+          'mask-repeat': 'no-repeat',
+          '-webkit-mask-size': 'contain',
+          'mask-size': 'contain',
+          '-webkit-mask-position': 'center',
+          'mask-position': 'center',
+          'position': 'relative',
+          'overflow': 'hidden' /* 保險起見加上 overflow */
+        }">
+          <!-- 2. 真正的碗底圖：放在底層顯示 -->
+          <div class="plate-background-image" :style="{
+            backgroundImage: currentPlate?.image ? `url(${currentPlate.image})` : 'none',
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center',
+            backgroundSize: 'contain',
+            position: 'absolute',
+            inset: 0,
+            zIndex: 0
+          }"></div>
+
+          <!-- 3. 圖案層：現在這些圖案會被父層的 mask-image 裁切 -->
+          <div v-for="pattern in placedPatterns" :key="pattern.id + '-preview'" class="plate-pattern-container" :style="{
+            position: 'absolute',
+            left: pattern.x / 2 + 'px',
+            top: pattern.y / 2 + 'px',
+            transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
+            width: pattern.size.width * 1 + 'px',
+            height: pattern.size.height * 1 + 'px',
+            zIndex: 1
+          }">
+            <div class="plate-pattern" :style="{
+              backgroundImage: `url(${pattern.image})`,
+              backgroundSize: 'contain',
+              backgroundRepeat: 'no-repeat',
+              width: '100%',
+              height: '100%'
+            }" />
           </div>
         </div>
+        <!-- <div class="preview-plate" :style="{
+          background: currentPlate?.image
+            ? `url(${currentPlate.image}) no-repeat center / contain` : 'none',
+          '-webkit-mask-image': currentPlate?.image
+            ? `url(${currentPlate.image}) no-repeat center / contain` : 'none',
+          'mask-image:': currentPlate?.image
+            ? `url(${currentPlate.image}) no-repeat center / contain` : 'none',
+        }" style="
+            padding: 10px 20px;
+          "> -->
+        <!-- 預覽盤子上的圖案 -->
+        <!-- <div v-for="pattern in placedPatterns" :key="pattern.id + '-preview'" class="plate-pattern-container" :style="{
+            width: pattern.size.width * 1.8 + 'px',
+            height: pattern.size.height * 1.8 + 'px',
+            left: pattern.x / 1.4 + 'px',
+            top: pattern.y / 1.4 + 'px',
+            // transform: `rotate(${pattern.rotation}deg)`,
+            transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
+          }">
+            <div class="plate-pattern" :style="{ backgroundImage: `url(${pattern.image})` }"></div>
+          </div> -->
+
+        <!-- <div v-for="pattern in placedPatterns" :key="pattern.id + '-preview'" class="plate-pattern-container" :style="{
+            left: pattern.x / 1.4 + 'px',
+            top: pattern.y / 1.4 + 'px',
+            transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
+            // fontSize: getPatternSize(pattern.patternId) + 'px',
+            width: pattern.size.width * 1.4 + 'px',
+            height: pattern.size.height * 1.4 + 'px',
+          }">
+            <div class="plate-pattern" :style="{
+              backgroundImage: `url(${pattern.image})`,
+              'max-width': pattern.size.width * 2 + 'px',
+              'max-height': pattern.size.height * 2 + 'px',
+            }" />
+          </div> -->
+        <!-- </div> -->
       </div>
 
       <div class="preview-details" ref="printDetailRef">
         <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
           <div class="text-sm font-bold text-gray-500 mb-1">盤子樣式</div>
           <div class="text-lg font-semibold text-gray-800">
-            {{ appStore.locale === "zh-TW" ? designStore.currentPlate?.name_zh : designStore.currentPlate?.name_en }}
+            {{
+              appStore.locale === "zh-TW"
+                ? designStore.currentPlate?.name_zh
+                : designStore.currentPlate?.name_en
+            }}
             <!-- {{ designStore.currentPlate?.name }} -->
           </div>
         </div>
 
         <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
           <div class="text-sm font-bold text-gray-500 mb-1">圖案數量</div>
-          <div class="text-lg font-semibold text-gray-800">{{ designStore.placedPatterns.length }} 個</div>
+          <div class="text-lg font-semibold text-gray-800">
+            {{ designStore.placedPatterns.length }} 個
+          </div>
           <div v-if="designStore.placedPatterns.length > 0" class="mt-2 space-y-1">
-            <div v-for="pattern in designStore.placedPatterns" :key="pattern.id" class="flex items-center justify-center gap-2 text-sm text-gray-600">
-              <div class="bg-center bg-no-repeat bg-contain" :style="{ backgroundImage: `url(${getImageUrl(pattern.image)})` }"></div>
+            <div v-for="pattern in designStore.placedPatterns" :key="pattern.id"
+              class="flex items-center justify-center gap-2 text-sm text-gray-600">
+              <div class="bg-center bg-no-repeat bg-contain"
+                :style="{ backgroundImage: `url(${getImageUrl(pattern.image)})` }"></div>
               <div class="flex justify-between w-full">
                 <span class="font-bold">{{ pattern.name }} ({{ pattern.size.width }}px)</span>
                 <span class="font-bold">{{ $t("currency") }} {{ pattern.price }} </span>
@@ -778,12 +848,12 @@ const simplePrint = () => {
 }
 
 .preview-container {
-  width: 500px;
-  height: 500px;
+  max-width: 500px;
+  max-height: 500px;
   position: relative;
   overflow: hidden;
-  border-radius: 50%;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  /* border-radius: 50%;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15); */
 }
 
 .preview-plate {
@@ -791,12 +861,18 @@ const simplePrint = () => {
   height: 100%;
   position: relative;
   overflow: hidden;
-  border-radius: 50%;
+
+  /* 让蒙版包含所有内容 */
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  /* 核心：自动裁掉超出蒙版的内容 */
+  -webkit-mask-mode: alpha;
+  mask-mode: alpha;
+  z-index: 1;
 }
 
 .plate-pattern-container {
   position: absolute;
-  /* cursor: move; */
   user-select: none;
   transition: transform 0.1s;
 }
@@ -807,6 +883,7 @@ const simplePrint = () => {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
+  z-index: 2;
 }
 
 .preview-controls {

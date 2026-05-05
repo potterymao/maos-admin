@@ -56,7 +56,7 @@ const { showLogo } = storeToRefs(settingsStore);
 
 .app-main {
   /* transition: padding-left $transition-time; */
-  padding-top: var(--navbar-height);
+  // padding-top: var(--navbar-height);
   height: 100vh;
   overflow: auto;
 }

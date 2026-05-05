@@ -4,6 +4,8 @@ const BASE_URL = "https://open.shopline.io/v1";
 const auth_token = "2f02e2666086ad2bfe21a1ecaff1d6ffbfef1acdb377206570a70275deb6e929";
 const plate_id = "69a91f41436917d8cc011bac";
 const pattern_id = "69a91f9a1936bba5ce715660";
+// https://kol.shoplineapp.com/invite/email/5e533ffa65b7fe000a2e199a/69f1c86a034e73fbf686e315/49666e3f5495916fcd14f66f7852076b
+const cart_id = "your_cart_id_here"; // 替換為實際的購物車 ID
 
 // const designStore = useDesignStore();
 
@@ -35,9 +37,12 @@ export async function GetPlates() {
   // try {
   const { data, error } = await useFetch<any>(`${BASE_URL}/products/search`, {
     // const response = await $fetch<any>(`${BASE_URL}/products/search`, {
-    // method: 'GET',
+    method: 'post',
     query: {
       category_id: plate_id,
+      // with_product_set: true,
+      // type: "product_set",
+      // "include_fields[]": "bundle_set"
     },
     headers: {
       "Content-Type": "application/json",

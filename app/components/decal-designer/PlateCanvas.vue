@@ -1,6 +1,6 @@
 <!-- components/PlateDesigner/PlateCanvas.vue -->
 <template>
-  <div class="plate-canvas-container">
+  <div class="panel plate-canvas-container">
     <div class="design-panel-title">
       <Icon name="ic:baseline-brush" class="text-blue-500" />
       <h2>{{ $t("_designer.designArea") }}</h2>
@@ -9,47 +9,33 @@
     <div class="canvas-wrapper">
       <div class="flex flex-col items-center">
         <!-- 盤子背景 -->
-        <div
-          ref="plateContainer"
-          class="relative rounded-full shadow-lg mt-6 mb-8"
-          :style="{
-            background: currentPlate?.image ? `url(${currentPlate.image}) no-repeat center / cover` : '#ffffff',
-            // backgroundColor: currentPlate?.color,
-            // boxShadow: `0 10px 30px ${currentPlate?.shadowColor}`,
-            width:  currentPlate?.size.width * 2 + 'px',
-            height: currentPlate?.size.height * 2 + 'px',
-          }"
-          @click="clearSelection"
-        >
-          <div v-if="placedPatterns.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
+        <div ref="plateContainer" class="relative shadow-lg" :style="{
+          background: currentPlate?.image ? `url(${currentPlate.image}) no-repeat center / contain` : '#ffffff',
+          width: currentPlate?.size.width * 2 + 'px',
+          height: currentPlate?.size.height * 2 + 'px',
+        }" style="background-origin: content-box;background-clip: content-box;padding: 10px"
+          @click="clearSelection">
+          <div v-if="placedPatterns.length === 0"
+            class="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
             <i class="i-mdi-plus-circle text-6xl mb-4 opacity-30"></i>
             <p class="text-lg">點擊左側圖案添加到盤子上</p>
           </div>
 
-          <div
-            v-for="pattern in placedPatterns"
-            :key="pattern.id"
-            class="pattern-on-plate"
-            :class="{ selected: pattern.selected }"
-            :style="{
+          <div v-for="pattern in placedPatterns" :key="pattern.id" class="pattern-on-plate"
+            :class="{ selected: pattern.selected }" :style="{
               left: pattern.x + 'px',
               top: pattern.y + 'px',
               transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
               fontSize: getPatternSize(pattern.patternId) + 'px',
               // width: pattern.size.width* 2 + 'px',
               // height: pattern.size.height* 2 + 'px',
-            }"
-            @mousedown="startDrag(pattern.id, $event)"
-            @click="selectPatternOnPlate(pattern.id)"
-          >
-            <div
-              class="pattern-item"
-              v-html="getPatternSvg(pattern.patternId)"
-              :style="{
-                'max-width': pattern.size.width * 2 + 'px',
-                'max-height': pattern.size.height * 2 + 'px',
-              }"
-            />
+            }" @mousedown="startDrag(pattern.id, $event)" @click="selectPatternOnPlate(pattern.id)">
+
+            <div class="pattern-item" v-html="getPatternSvg(pattern.patternId)" :style="{
+              width: pattern.size.width * 2 + 'px',
+              height: pattern.size.height * 2 + 'px',
+            }" />
+
             <div class="pattern-controls">
               <!-- <button class="control-btn rotate" @mousedown.stop="startRotate(pattern.id, $event)" @touchstart.stop="startRotate(pattern.id, $event)">
                 <Icon name="ic:baseline-cached" class="text-blue-500" />
@@ -87,17 +73,17 @@
       <div class="pattern-controls">
         <el-slider v-model="rotationValue" :min="0" :max="360" :step="1" @input="updateSelectedRotation" show-input>
           <template #prepend>{{ $t("rotation") }}</template>
-        </el-slider>
+</el-slider>
 
-        <el-slider v-model="scaleValue" :min="0.1" :max="3" :step="0.1" @input="updateSelectedScale" show-input>
-          <template #prepend>{{ $t("scale") }}</template>
-        </el-slider>
+<el-slider v-model="scaleValue" :min="0.1" :max="3" :step="0.1" @input="updateSelectedScale" show-input>
+  <template #prepend>{{ $t("scale") }}</template>
+</el-slider>
 
-        <el-button type="danger" @click="deleteSelectedPattern" icon="Delete">
-          {{ $t("deleteSelected") }}
-        </el-button>
-      </div>
-    </div> -->
+<el-button type="danger" @click="deleteSelectedPattern" icon="Delete">
+  {{ $t("deleteSelected") }}
+</el-button>
+</div>
+</div> -->
   </div>
 </template>
 
@@ -154,7 +140,7 @@ const getPatternSvg = (patternId: string) => {
 // 計算圖案尺寸
 const getPatternSize = (patternId: string) => {
   const pattern = designStore.getPatternById(patternId);
-  return pattern?.defaultSize || 50;
+  return pattern?.defaultSize || 100;
 };
 
 // 選擇盤子上的圖案
@@ -453,6 +439,9 @@ const rotatePattern = (patternId: string) => {
 
 .pattern-item {
   pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .pattern-item :deep(svg) {
