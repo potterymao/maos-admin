@@ -9,7 +9,7 @@
         :class="['plate-card', { active: designStore.currentMainPlate?.id === plate.id }]"
         @click="designStore.selectMainPlate(plate.id)">
         <div class="rounded-full mx-auto mb-2 flex items-center justify-center">
-          <img :src="plate.image" :alt="plate.name" class="w-18 h-18 object-contain" />
+          <img :src="plate.image" class="w-18 h-18 object-contain" />
         </div>
         <div class="text-center plate-info text-gray-800">
           <h4>{{ appStore.locale === "zh-TW" ? plate.name_zh : plate.name_en }}</h4>
@@ -22,16 +22,14 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-      <div v-for="(child, i) in designStore.currentMainPlate?.variations" :key="child.id"
+      <div v-for="(child, i) in currentMainPlate?.children" :key="child.id"
         :class="['plate-card', { active: designStore.currentPlate?.id === child.id }]"
         @click="designStore.selectPlate(child.id)">
         <div class="rounded-full mx-auto mb-2 flex items-center justify-center">
-          <img :src="child.media.images.source.url" :alt="child.name" class="w-18 h-18 object-contain" />
+          <img :src="child.image" class="w-18 h-18 object-contain" />
         </div>
         <div class="text-center plate-info text-gray-800 mt-4">
-          <h4>{{ appStore.locale === "zh-TW" ?
-            designStore.currentMainPlate?.variant_options[i].name_translations['zh-hant'] :
-            designStore.currentMainPlate?.variant_options[i].name_translations.en }}</h4>
+          <h4>{{ appStore.locale === "zh-TW" ? child.name_zh : child.name_en }}</h4>
         </div>
       </div>
     </div>
@@ -46,6 +44,7 @@ const appStore = useAppStore();
 const designStore = useDesignStore();
 
 const plates = ref([]);
+const currentMainPlate = computed(() => designStore.currentMainPlate);
 
 // 獲取圖案列表
 const getPlates = async () => {
@@ -62,8 +61,8 @@ const getPlates = async () => {
         size: { width: 350, height: 350 },
         price: item.price.dollar || 300,
         children: [],
-        variations: item.variations || [],
-        variant_options: item.variant_options || [],
+        // variations: item.variations || [],
+        // variant_options: item.variant_options || [],
       });
 
       if (item.variations && item.variations.length > 0) {
