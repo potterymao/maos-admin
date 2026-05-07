@@ -11,13 +11,6 @@
 </template>
 
 <script setup lang="ts">
-// import Footer from "@/components/core/Footer";
-// export default {
-//   name: "CoreView",
-//   components: {
-//     CoreFooter: Footer,
-//   },
-// };
 </script>
 
 <style lang="scss" scoped>

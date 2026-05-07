@@ -8,7 +8,7 @@
     <div class="final-preview mt-12" ref="printContainerRef">
       <div class="preview-container" ref="printContentRef">
         <div class="preview-plate" :style="{
-          width: currentPlate?.size.width  + 'px',
+          width: currentPlate?.size.width + 'px',
           height: currentPlate?.size.height + 'px',
           '-webkit-mask-image': currentPlate?.image ? `url(${currentPlate.image})` : 'none',
           'mask-image': currentPlate?.image ? `url(${currentPlate.image})` : 'none',
@@ -152,8 +152,8 @@
         列印設計
       </el-button>
       <el-button @click="finishDesign">
-        <Icon name="material-symbols:print-rounded" class="text-[20px] mr-1" />
-        設計完成
+        <Icon name="material-symbols:shopping-cart-outline" class="text-[20px] mr-1" />
+        加到購物車
       </el-button>
       <!-- <button class="btn btn-secondary" @click="downloadImage"><i class="fas fa-image"></i> 下載圖片</button> -->
       <!-- <button class="btn btn-secondary" @click="printDesign"><i class="fas fa-print"></i> 列印設計</button> -->
@@ -291,7 +291,7 @@
 <script setup lang="ts">
 import html2canvas from "html2canvas-pro";
 
-import { useFetchPatterns, GetPatterns } from "@/api";
+import { AddToCart } from "@/api";
 
 const appStore = useAppStore();
 const designStore = useDesignStore();
@@ -429,8 +429,18 @@ const downloadImage = async () => {
   }
 };
 
-const finishDesign = () => {
-  ElMessage.success("感謝您的設計！我們將盡快與您聯繫確認訂單細節。");
+const finishDesign = async () => {
+  // ElMessage.success("感謝您的設計！我們將盡快與您聯繫確認訂單細節。");
+
+  const response = await AddToCart(designStore.addToCartPatterns);
+  if (response) {
+    window.open(response.link, "_blank");
+    ElMessage.success("已成功加入購物車！");
+  } else {
+    ElMessage.error("加入購物車失敗，請稍後重試");
+  }
+
+
   designStore.finishDesign();
 };
 

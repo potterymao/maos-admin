@@ -47,7 +47,7 @@
 <script setup lang="ts">
 // import { onMounted } from "vue";
 import type { SelectMenuItem } from "@nuxt/ui";
-import { GetPatterns, GetImage } from "@/api";
+import { GetImage } from "@/api";
 
 const appStore = useAppStore();
 const designStore = useDesignStore();
@@ -82,20 +82,27 @@ const patterns = ref([]);
 // const patterns = computed(() => designStore.patterns);
 // const placedPatterns = computed(() => designStore.placedPatterns);
 
+const initData = async () => {
+  await designStore.fetchPatterns();
+  await getPatterns();
+};
+
 // 獲取圖案列表
 const getPatterns = async () => {
   let patternsData: any = [];
-  const response = await GetPatterns();
+  const response: any = computed(() => designStore.patterns).value;
+  // const response = await GetPatterns();
   if (response && response.items) {
     for (const item of response.items) {
       if (item.variations && item.variations.length > 0) {
         for (const [i, variation] of item.variations.entries()) {
           patternsData.push({
             id: variation.id,
+            parent_id: item.id,
             name_en: item.variant_options[i].name_translations.en,
             name_zh: item.variant_options[i].name_translations["zh-hant"],
             image: variation.media?.images.source.url ? await GetImage(variation.media.images.source.url) : "",
-            price: variation.price.dollar || 0,
+            price: variation.price.dollars || 0,
             price_label: variation.price.label,
             type: item.type,
             // category: item.category_id,
@@ -121,13 +128,16 @@ const getPatterns = async () => {
     designStore.SetPatterns(patternsData);
   }
 };
-getPatterns();
+// getPatterns();
+
+// 初始化數據
+initData();
 
 // 過濾圖案
 const filteredPatterns = computed(() => {
   let filtered = patterns.value || [];
 
-  console.log("All patterns:", filtered);
+  // console.log("All patterns:", filtered);
 
   // 分類過濾
   if (activeCategory.value !== "all") {

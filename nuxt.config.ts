@@ -101,7 +101,7 @@ export default defineNuxtConfig({
       link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
     },
     // baseURL: process.env.NODE_ENV === "production" ? "/maos-admin/" : "/",
-    baseURL: "/maos-admin/",
+    // baseURL: "/maos-admin/",
     buildAssetsDir: "/static/",
   },
 
@@ -125,6 +125,22 @@ export default defineNuxtConfig({
       crawlLinks: true, // 自動尋找連結生成 HTML
       failOnError: false, // 即使某頁報錯(如 window is not defined)，也強制完成 build 產出 index.html
     },
+    // devProxy: {
+    //   "/shopline_api": {
+    //     target: "https://open.shopline.io/v1", // 替換為真實的 API Base URL
+    //     changeOrigin: true,
+    //   },
+    // },
+  },
+
+  runtimeConfig: {
+    public: {
+      shoplineApi: process.env.SHOPLINE_API_URL || 'https://open.shopline.io/v1',
+      shoplineAccessKey: process.env.SHOPLINE_ACCESS_KEY || '',
+      shoplinePlateId: process.env.SHOPLINE_PLATE_CATEGORY_ID || '',
+      shoplinePatternId: process.env.SHOPLINE_PATTERN_CATEGORY_ID || '',
+      shoplineMerchantId: process.env.SHOPLINE_MERCHANT_ID || ''
+    }
   },
 
   routeRules: {

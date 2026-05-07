@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { GetPlates, GetImage } from "@/api";
+import { GetImage } from "@/api";
 // import IconPlate from "@/assets/images/svg/plate.svg";
 
 const appStore = useAppStore();
@@ -46,10 +46,16 @@ const designStore = useDesignStore();
 const plates = ref([]);
 const currentMainPlate = computed(() => designStore.currentMainPlate);
 
+const initData = async () => {
+  await designStore.fetchPlates();
+  await getPlates();
+};
+
 // 獲取圖案列表
 const getPlates = async () => {
   let platesData: any = [];
-  const response = await GetPlates();
+  const response: any = computed(() => designStore.plates).value;
+
   if (response && response.items) {
     for (const [i, item] of response.items.entries()) {
       platesData.push({
@@ -61,8 +67,6 @@ const getPlates = async () => {
         size: { width: 350, height: 350 },
         price: item.price.dollar || 300,
         children: [],
-        // variations: item.variations || [],
-        // variant_options: item.variant_options || [],
       });
 
       if (item.variations && item.variations.length > 0) {
@@ -83,7 +87,10 @@ const getPlates = async () => {
     designStore.SetPlates(platesData);
   }
 };
-getPlates();
+
+// 初始化數據
+initData();
+
 </script>
 
 <style lang="scss" scoped>

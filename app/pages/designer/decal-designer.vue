@@ -13,67 +13,35 @@
   <div class="p-4 md:p-6">
     <div class="flex flex-col lg:flex-row gap-6 mb-8">
       <!-- 左側：盤子和圖案選擇 -->
+      <!-- <div class="lg:w-1/5 space-y-6">
+        <PatternSelector />
+      </div> -->
+
+      <!-- 中間：設計區域 -->
+      <div class="lg:w-4/5 space-y-6">
+        <PlateSelector />
+        <!-- <PlateCanvas /> -->
+      </div>
+
+      <!-- 右側：圖案控制 -->
+      <div class="lg:w-1/5">
+        <!-- <PatternEditor /> -->
+      </div>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-6 mb-8">
+      <!-- 左側：盤子和圖案選擇 -->
       <div class="lg:w-1/5 space-y-6">
-        <!-- <PlateSelector /> -->
         <PatternSelector />
       </div>
 
       <!-- 中間：設計區域 -->
       <div class="lg:w-3/5 space-y-6">
-        <PlateSelector />
         <PlateCanvas />
-        <!-- <div class="panel">
-          <div class="flex flex-col items-center"> -->
-        <!-- 盤子容器 -->
-        <!-- <div
-              ref="plateContainer"
-              class="relative w-96 h-96 rounded-full shadow-lg mb-6 overflow-hidden"
-              :style="{
-                backgroundColor: designStore.selectedPlate.color,
-                boxShadow: `0 10px 30px ${designStore.selectedPlate.shadowColor}`,
-              }"
-              @click="clearSelection"
-            > -->
-        <!-- 圖案元素 -->
-        <!-- <PatternElement
-                v-for="(pattern, index) in designStore.patterns"
-                :key="pattern.id"
-                :pattern="pattern"
-                :index="index"
-                @select="handleSelectPattern"
-                @remove="handleRemovePattern"
-                @start-resize="handleStartResize"
-                @start-rotate="handleStartRotate"
-              /> -->
-
-        <!-- 空白狀態 -->
-        <!-- <div v-if="designStore.patterns.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                <i class="i-mdi-plus-circle text-6xl mb-4 opacity-30"></i>
-                <p class="text-lg">點擊左側圖案添加到盤子上</p>
-              </div> -->
-        <!-- </div> -->
-
-        <!-- 操作按鈕 -->
-        <!-- <div class="flex gap-3">
-              <el-button type="danger" @click="designStore.resetPlate">
-                <i class="i-mdi-refresh mr-1"></i>
-                重置盤子
-              </el-button>
-              <el-button type="primary" @click="designStore.finishDesign">
-                <i class="i-mdi-eye mr-1"></i>
-                預覽設計
-              </el-button>
-              <el-button @click="designStore.exportDesign">
-                <i class="i-mdi-export mr-1"></i>
-                匯出設計
-              </el-button>
-            </div> -->
-        <!-- </div>
-        </div> -->
       </div>
 
       <!-- 右側：圖案控制 -->
-      <div class="sidebar lg:w-1/5">
+      <div class="lg:w-1/5">
         <PatternEditor />
       </div>
     </div>
@@ -81,223 +49,14 @@
     <!-- 預覽區域 -->
     <DesignPreview v-if="designStore.showPreview" />
   </div>
-
-  <!-- <div class="plate-designer-page">
-    <div class="page-header">
-      <h1>{{ $t("plateDesigner") }}</h1>
-      <p>{{ $t("pageDescription") }}</p>
-    </div>
-
-    <div class="main-content"> -->
-      <!-- 左側 - 盤子選擇 -->
-      <!-- <div class="sidebar left-sidebar"> -->
-        <!-- <div class="section">
-          <h3>{{ $t("selectPlate") }}</h3>
-          <div class="plates-grid">
-            <div v-for="plate in plates" :key="plate.id" class="plate-card" :class="{ active: plate.id === currentPlate?.id }" @click="selectPlate(plate.id)">
-              <div class="plate-image-wrapper">
-                <i :class="plate.icon" :style="{ color: plate.iconColor, fontSize: '2rem' }"></i>
-              </div>
-              <div class="plate-info">
-                <h4>{{ plate.name }}</h4>
-                <p>{{ $t("size") }}: {{ plate.size.width }} × {{ plate.size.height }}mm</p>
-                <p>{{ $t("price") }}: ${{ plate.price }}</p>
-              </div>
-            </div>
-          </div>
-        </div> -->
-
-        <!-- 圖案庫 -->
-        <!-- <div class="section">
-          <PatternLibrary />
-        </div> -->
-      <!-- </div> -->
-
-      <!-- 中間 - 設計畫布 -->
-      <!-- <div class="design-area">
-        <PlateCanvas />
-      </div> -->
-
-      <!-- 右側 - 控制面板 -->
-      <!-- <div class="sidebar right-sidebar"> -->
-        <!-- <div class="section">
-          <h3>{{ $t("designInfo") }}</h3>
-          <div class="info-card">
-            <div class="info-item">
-              <span class="label">{{ $t("selectedPlate") }}:</span>
-              <span class="value">{{ currentPlate?.name }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">{{ $t("patternCount") }}:</span>
-              <span class="value">{{ totalPatternsCount }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">{{ $t("totalPrice") }}:</span>
-              <span class="value price">${{ designPrice }}</span>
-            </div>
-          </div>
-        </div> -->
-
-        <!-- 設計工具 -->
-        <!-- <div class="section">
-          <h3>{{ $t("designTools") }}</h3>
-          <div class="tools-grid">
-            <el-button @click="undo" icon="Back" :disabled="!canUndo">
-              {{ $t("undo") }}
-            </el-button>
-            <el-button @click="redo" icon="Right" :disabled="!canRedo">
-              {{ $t("redo") }}
-            </el-button>
-            <el-button @click="resetDesign" icon="Refresh">
-              {{ $t("reset") }}
-            </el-button>
-            <el-button type="primary" @click="preview" icon="View">
-              {{ $t("preview") }}
-            </el-button>
-            <el-button type="success" @click="exportDesign" icon="Download">
-              {{ $t("export") }}
-            </el-button>
-          </div>
-        </div> -->
-
-        <!-- 設計歷史 -->
-        <!-- <div class="section">
-          <h3>{{ $t("designHistory") }}</h3>
-          <div class="history-list">
-            <div v-for="design in designHistory" :key="design.createdAt.getTime()" class="history-item" @click="loadDesign(design)">
-              <div class="history-preview">
-                <div class="mini-plate">
-                  <span>{{ design.patterns.length }} {{ $t("patterns") }}</span>
-                </div>
-              </div>
-              <div class="history-info">
-                <span class="date">{{ formatDate(design.createdAt) }}</span>
-              </div>
-            </div>
-          </div>
-        </div> -->
-      <!-- </div> -->
-    <!-- </div> -->
-
-    <!-- 預覽彈窗 -->
-    <!-- <PreviewModal v-model:visible="showPreview" :design="currentDesign" /> -->
-  <!-- </div> -->
 </template>
 
 <script setup lang="ts">
-// import { usePlateDesigner } from "~/composables/usePlateDesigner";
 import { useDesignStore } from "~/stores/useDesignStore";
 
 const { startDrag, startResize, startRotate } = usePlateDesigner();
 
 const designStore = useDesignStore();
-// const plateContainer = ref<HTMLElement>();
-
-// const clearSelection = () => {
-//   designStore.patterns.forEach((p) => (p.selected = false));
-// };
-
-// const handleSelectPattern = (index: number) => {
-//   designStore.selectPattern(index);
-// };
-
-// const handleRemovePattern = (index: number) => {
-//   designStore.removePattern(index);
-// };
-
-// const handleStartResize = (event: MouseEvent | TouchEvent, direction: string) => {
-//   if (designStore.selectedPatternIndex !== null) {
-//     if ("touches" in event) {
-//       // 處理觸摸事件
-//       const touchEvent = event as TouchEvent;
-//       const mouseEvent = new MouseEvent("mousedown", {
-//         clientX: touchEvent.touches[0].clientX,
-//         clientY: touchEvent.touches[0].clientY,
-//       });
-//       startResize(designStore.selectedPatternIndex, mouseEvent, direction);
-//     } else {
-//       startResize(designStore.selectedPatternIndex, event as MouseEvent, direction);
-//     }
-//   }
-// };
-
-// const handleStartRotate = (event: MouseEvent | TouchEvent) => {
-//   if (designStore.selectedPatternIndex !== null) {
-//     if ("touches" in event) {
-//       const touchEvent = event as TouchEvent;
-//       const mouseEvent = new MouseEvent("mousedown", {
-//         clientX: touchEvent.touches[0].clientX,
-//         clientY: touchEvent.touches[0].clientY,
-//       });
-//       startRotate(designStore.selectedPatternIndex, mouseEvent);
-//     } else {
-//       startRotate(designStore.selectedPatternIndex, event as MouseEvent);
-//     }
-//   }
-// };
-
-// import { computed, ref } from "vue";
-// import { usePlateDesignerStore } from "~/stores/useDesignStore";
-// import PlateCanvas from "~/components/decal-designer/PlateCanvas.vue";
-// import PatternLibrary from "~/components/decal-designer/PatternLibrary.vue";
-// // import PreviewModal from "~/components/decal-designer/PreviewModal.vue";
-// import { Back, Right, Refresh, View, Download } from "@element-plus/icons-vue";
-
-// const store = usePlateDesignerStore();
-
-// // 計算屬性
-// const plates = computed(() => store.plates);
-// const currentPlate = computed(() => store.currentPlate);
-// const totalPatternsCount = computed(() => store.totalPatternsCount);
-// const designPrice = computed(() => store.designPrice);
-// const designHistory = computed(() => store.designHistory.slice(0, 5));
-
-// // const currentDesign = computed(() => ({
-// //   plate: currentPlate.value,
-// //   patterns: store.placedPatterns,
-// //   backgroundColor: store.backgroundColor,
-// // }));
-
-// // 狀態
-// const showPreview = ref(false);
-// const canUndo = ref(false);
-// const canRedo = ref(false);
-
-// // 方法
-// const selectPlate = (plateId: string) => {
-//   store.selectPlate(plateId);
-// };
-
-// const undo = () => {
-//   // 實現撤銷邏輯
-// };
-
-// const redo = () => {
-//   // 實現重做邏輯
-// };
-
-// const resetDesign = () => {
-//   store.clearAllPatterns();
-//   ElMessage.info("設計已重置");
-// };
-
-// const preview = () => {
-//   store.togglePreviewMode();
-//   showPreview.value = true;
-// };
-
-// const exportDesign = () => {
-//   // 實現導出邏輯
-//   ElMessage.success("正在導出設計...");
-// };
-
-// const loadDesign = (design: any) => {
-//   // 實現加載設計邏輯
-// };
-
-// const formatDate = (date: Date) => {
-//   return date.toLocaleDateString();
-// };
 </script>
 
 <style scoped>

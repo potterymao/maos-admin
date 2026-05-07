@@ -1,5 +1,5 @@
 <template>
-  <footer class="pt-30px pb-20px px-5% bg-#FEFDE6">
+  <footer class="bg-#FEFDE6 py-6">
     <template v-if="!isMobile"> 
       <div class="layout-footer mt-20px">&copy {{ new Date().getFullYear() }} Mao's studio</div>
     </template>

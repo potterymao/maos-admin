@@ -41,9 +41,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import { usePlateDesignerStore } from "~/stores/useDesignStore";
+// import { usePlateDesignerStore } from "~/stores/useDesignStore";
 
-const store = usePlateDesignerStore();
+// const store = usePlateDesignerStore();
 const searchQuery = ref("");
 const activeCategory = ref("all");
 

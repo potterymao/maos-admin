@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
-import { GetPlates, GetImage } from "@/api";
+import { GetImage } from "@/api";
 import type { Plate, PlateDesign, PlateStyle, Pattern, PlacedPattern, DesignState } from "~~/types";
+import { pa } from "element-plus/es/locale/index.mjs";
 
 export const useDesignStore = defineStore("design", {
   state: () => ({
@@ -15,6 +16,10 @@ export const useDesignStore = defineStore("design", {
     placedPatterns: [] as PlacedPattern[],
     selectedPattern: null as PlacedPattern | null,
     designHistory: [] as PlateDesign[],
+    addToCartPatterns: [] as any[],
+
+    loading: false,
+    error: null as string | null
   }),
 
   getters: {
@@ -35,6 +40,87 @@ export const useDesignStore = defineStore("design", {
 
   actions: {
     // Get Plates
+    async fetchPlates() {
+      this.loading = true
+      this.error = null
+
+      const config = useRuntimeConfig()
+      const categoryId = config.public.shoplinePlateId
+
+      if (this.plates.length > 0) return;
+
+      try {
+        // 呼叫我們寫好的 Server API Proxy
+        const response = await $fetch<any>('/api/shopline/products/search', {
+          method: 'POST',
+          query: { category_id: categoryId }
+        })
+
+        // 假設 Shopline 回傳的資料結構在 response.data
+        this.SetPlates(response.data || response)
+      } catch (err: any) {
+        this.error = err.data?.message || '抓取資料失敗'
+        console.error('Store fetchPlates Error:', err)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // Get Patterns
+    async fetchPatterns() {
+      this.loading = true
+      this.error = null
+
+      const config = useRuntimeConfig()
+      const categoryId = config.public.shoplinePatternId
+
+      if (this.patterns.length > 0) return;
+
+      try {
+        // 呼叫我們寫好的 Server API Proxy
+        const response = await $fetch<any>('/api/shopline/products/search', {
+          method: 'POST',
+          query: { category_id: categoryId }
+        })
+
+        // 假設 Shopline 回傳的資料結構在 response.data
+        // this.SetPatterns(response.data || response)
+      } catch (err: any) {
+        this.error = err.data?.message || '抓取資料失敗'
+        console.error('Store fetchPatterns Error:', err)
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // async GetImage() {
+    //   this.loading = true
+    //   this.error = null
+
+    //   const config = useRuntimeConfig()
+    //   const categoryId = config.public.shoplinePatternId
+
+    //   if (this.patterns.length > 0) return;
+
+    //   try {
+    //     // 呼叫我們寫好的 Server API Proxy
+    //     const response = await $fetch<any>('/api/shopline/products/search', {
+    //       method: 'POST',
+    //       query: { category_id: categoryId }
+    //     })
+
+    //     // 假設 Shopline 回傳的資料結構在 response.data
+    //     this.SetPatterns(response.data || response)
+    //   } catch (err: any) {
+    //     this.error = err.data?.message || '抓取資料失敗'
+    //     console.error('Store fetchPatterns Error:', err)
+    //   } finally {
+    //     this.loading = false
+    //   }
+    // },
+
+
+
     SetPlates(data: any) {
       this.plates = data;
 
@@ -246,6 +332,7 @@ export const useDesignStore = defineStore("design", {
     //   this.patterns.push(newPattern);
     // },
 
+
     addPattern(patternId: string) {
       const pattern = this.getPatternById(patternId);
       if (!pattern || !this.currentPlate) return;
@@ -253,9 +340,12 @@ export const useDesignStore = defineStore("design", {
       const placedPattern = {
         id: `placed-${Date.now()}`,
         patternId: pattern.id,
+        parentId: pattern.parent_id,
         image: pattern.image,
-        name: pattern.name,
+        name_zh: pattern.name_zh,
+        name_en: pattern.name_en,
         price: pattern.price,
+        price_label: pattern.price_label,
         // position: { x: this.currentPlate.size.width / 2 - pattern.defaultSize / 2, y: this.currentPlate.size.height / 2 - pattern.defaultSize / 2 },
         x: this.currentPlate.size.width / 2 - pattern.defaultSize / 2,
         y: this.currentPlate.size.height / 2 - pattern.defaultSize / 2,
@@ -270,12 +360,18 @@ export const useDesignStore = defineStore("design", {
       };
 
       this.placedPatterns.push(placedPattern);
+
+      this.addToCartPatterns.push({
+        id: pattern.parent_id,
+        variation_id: pattern.id,
+      });
     },
 
     removePattern(id: string) {
       const index = this.placedPatterns.findIndex((p) => p.id === id);
       if (index !== -1) {
         this.placedPatterns.splice(index, 1);
+        this.addToCartPatterns.splice(index, 1);
         if (this.selectedPattern?.id === id) {
           this.selectedPattern = null;
         }

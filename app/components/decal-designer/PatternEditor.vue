@@ -8,7 +8,7 @@
     <div class="info-card">
       <div class="info-item">
         <span class="label">{{ $t("_designer.selectedPlate") }}:</span>
-        <span class="value">{{ currentPlate?.name }}</span>
+        <span class="value">{{ appStore.locale === "zh-TW" ? currentPlate?.name_zh : currentPlate?.name_en }}</span>
       </div>
       <div class="info-item">
         <span class="label">{{ $t("_designer.patternCount") }}:</span>
@@ -32,8 +32,8 @@
             @click="selectPatternOnPlate(pattern.id)"
           >
             <div class="pattern-item-index">{{ index + 1 }}</div>
-            <div class="pattern-item-name">{{ pattern.name }}</div>
-            <span class="text-blue-400 text-[14px]">$ {{ pattern.price }}</span>
+            <div class="pattern-item-name">{{ appStore.locale === "zh-TW" ? pattern?.name_zh : pattern?.name_en }}</div>
+            <span class="text-blue-400 text-[14px]">$ {{ pattern?.price }}</span>
             <!-- <el-button type="danger" @click="removePattern">
               <Icon name="material-symbols:delete-forever-rounded" class="text-[20px]" />
             </el-button> -->
@@ -159,6 +159,7 @@
 </template>
 
 <script setup lang="ts">
+const appStore = useAppStore();
 const designStore = useDesignStore();
 // const currentPlate = computed(() => store.currentPlate);
 const currentPlate = computed(() => designStore.currentPlate);
