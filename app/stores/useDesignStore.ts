@@ -84,7 +84,7 @@ export const useDesignStore = defineStore("design", {
         })
 
         // 假設 Shopline 回傳的資料結構在 response.data
-        // this.SetPatterns(response.data || response)
+        this.SetPatterns(response.data || response)
       } catch (err: any) {
         this.error = err.data?.message || '抓取資料失敗'
         console.error('Store fetchPatterns Error:', err)
@@ -92,34 +92,6 @@ export const useDesignStore = defineStore("design", {
         this.loading = false
       }
     },
-
-    // async GetImage() {
-    //   this.loading = true
-    //   this.error = null
-
-    //   const config = useRuntimeConfig()
-    //   const categoryId = config.public.shoplinePatternId
-
-    //   if (this.patterns.length > 0) return;
-
-    //   try {
-    //     // 呼叫我們寫好的 Server API Proxy
-    //     const response = await $fetch<any>('/api/shopline/products/search', {
-    //       method: 'POST',
-    //       query: { category_id: categoryId }
-    //     })
-
-    //     // 假設 Shopline 回傳的資料結構在 response.data
-    //     this.SetPatterns(response.data || response)
-    //   } catch (err: any) {
-    //     this.error = err.data?.message || '抓取資料失敗'
-    //     console.error('Store fetchPatterns Error:', err)
-    //   } finally {
-    //     this.loading = false
-    //   }
-    // },
-
-
 
     SetPlates(data: any) {
       this.plates = data;
@@ -135,136 +107,6 @@ export const useDesignStore = defineStore("design", {
     SetPatterns(data: any) {
       this.patterns = data;
     },
-
-    // Get Plates API
-    // async loadPlates() {
-    //   this.plates = [];
-    //   this.currentPlate = null;
-    //   const response = await GetPlates();
-    //   // console.log("Loaded plates:", response.items);
-    //   for (const item of response.items) {
-    //     this.plates.push({
-    //       id: item.id,
-    //       name_en: item.title_translations.en,
-    //       name_zh: item.title_translations["zh-hant"],
-    //       // image: item.medias?.[0]?.images.source.url || "",
-    //       image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
-    //       type: item.type,
-    //       size: { width: 350, height: 350 },
-    //       price: item.price.dollar || 300,
-    //     });
-    //   }
-
-    //   // console.log("Loaded plates:", this.plates);
-    //   // 模擬API調用
-    //   // this.plates = [
-    //   //   {
-    //   //     id: "1",
-    //   //     name: "經典白瓷",
-    //   //     type: "white",
-    //   //     size: { width: 300, height: 300 },
-    //   //     icon: "i-mdi-circle",
-    //   //     iconColor: "#f0f0f0",
-    //   //     color: "#ffffff",
-    //   //     shadowColor: "rgba(0,0,0,0.1)",
-    //   //     price: 199,
-    //   //   },
-    //   //   {
-    //   //     id: "2",
-    //   //     name: "粉色瓷盤",
-    //   //     type: "pink",
-    //   //     icon: "i-mdi-circle",
-    //   //     iconColor: "#f48fb1",
-    //   //     color: "#f8bbd0",
-    //   //     shadowColor: "rgba(244,143,177,0.3)",
-    //   //     size: { width: 290, height: 290 },
-    //   //     price: 189,
-    //   //   },
-    //   //   {
-    //   //     id: "3",
-    //   //     name: "金色邊盤",
-    //   //     type: "golden",
-    //   //     icon: "i-mdi-circle-outline",
-    //   //     iconColor: "#ffd54f",
-    //   //     color: "#fff9c4",
-    //   //     shadowColor: "rgba(255,213,79,0.3)",
-    //   //     size: { width: 350, height: 350 },
-    //   //     price: 299,
-    //   //   },
-    //   // ];
-
-    //   if (this.plates.length > 0 && !this.currentPlate) {
-    //     if (this.plates[0]) {
-    //       this.currentPlate = this.plates[0];
-    //     }
-    //   }
-    // },
-
-    // Get Patterns API
-    // async loadPatterns() {
-    //   this.patterns = [];
-    //   const response = await GetPatterns();
-    //   // console.log("Loaded patterns:", response.items);
-    //   for (const item of response.items) {
-    //     this.patterns.push({
-    //       id: item.id,
-    //       name_en: item.title_translations["en"],
-    //       name_zh: item.title_translations["zh-hant"],
-    //       price: item.price.dollar || 0,
-    //       type: item.type,
-    //       category: item.category_id,
-    //       // image: item.medias?.[0]?.images.source.url || "",
-    //       image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
-    //       size: { width: 30, height: 30 },
-    //       defaultSize: 50,
-    //     });
-    //   }
-
-    //   // 模擬圖案數據
-    //   // this.patterns = [
-    //   //   {
-    //   //     id: "p1",
-    //   //     name: "花朵",
-    //   //     category: "flower",
-    //   //     // image: "/patterns/flower.svg",
-    //   //     size: { width: 40, height: 40 },
-    //   //     // svg: '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#FF6B6B"/></svg>',
-    //   //     defaultSize: 50,
-    //   //     price: 50,
-    //   //     // color: "#FF6B6B",
-    //   //   },
-    //   //   {
-    //   //     id: "p2",
-    //   //     name: "幾何圖形",
-    //   //     category: "geometric",
-    //   //     image: "/patterns/star.svg",
-    //   //     size: { width: 30, height: 30 },
-    //   //     // svg: '<svg viewBox="0 0 100 100"><polygon points="50,5 95,35 95,85 50,115 5,85 5,35" fill="#4ECDC4"/></svg>',
-    //   //     defaultSize: 50,
-    //   //     price: 50,
-    //   //   },
-    //   //   {
-    //   //     id: "p3",
-    //   //     name: "動物圖案",
-    //   //     category: "animal",
-    //   //     image: "/patterns/animal.svg",
-    //   //     size: { width: 20, height: 40 },
-    //   //     // svg: '<svg viewBox="0 0 100 100"><path d="M50,20 Q70,30 80,50 Q70,70 50,80 Q30,70 20,50 Q30,30 50,20" fill="#FFD166"/></svg>',
-    //   //     defaultSize: 50,
-    //   //     price: 50,
-    //   //   },
-    //   //   {
-    //   //     id: "p4",
-    //   //     name: "愛心",
-    //   //     category: "heart",
-    //   //     image: "/patterns/heart.svg",
-    //   //     size: { width: 20, height: 40 },
-    //   //     // svg: '<svg viewBox="0 0 100 100"><path d="M50,20 Q70,30 80,50 Q70,70 50,80 Q30,70 20,50 Q30,30 50,20" fill="#FFD166"/></svg>',
-    //   //     defaultSize: 50,
-    //   //     price: 50,
-    //   //   },
-    //   // ];
-    // },
 
     // async finishDesign() {
     //   const response = await AddToCart();
@@ -309,30 +151,7 @@ export const useDesignStore = defineStore("design", {
       this.selectedPattern = this.placedPatterns.find((p) => p.id === id) || null;
     },
 
-    // addPattern(pattern: Pattern) {
-    //   const newPattern: PlacedPattern = {
-    //     id: this.nextPatternId++,
-    //     patternId: pattern.id,
-    //     name: pattern.name,
-    //     image: pattern.image,
-    //     width: 80,
-    //     height: 80,
-    //     x: 210,
-    //     y: 210,
-    //     rotation: 0,
-    //     scale: 1,
-    //     zIndex: this.patterns.length + 1,
-    //     selected: false,
-    //   };
-
-    //   // 取消所有其他圖案的選中狀態
-    //   this.patterns.forEach((p) => (p.selected = false));
-    //   newPattern.selected = true;
-
-    //   this.patterns.push(newPattern);
-    // },
-
-
+    // 選擇圖案後，將其置於最上層
     addPattern(patternId: string) {
       const pattern = this.getPatternById(patternId);
       if (!pattern || !this.currentPlate) return;
@@ -367,6 +186,7 @@ export const useDesignStore = defineStore("design", {
       });
     },
 
+    // 圖案移除後，同步更新購物車圖案列表
     removePattern(id: string) {
       const index = this.placedPatterns.findIndex((p) => p.id === id);
       if (index !== -1) {
@@ -482,6 +302,7 @@ export const useDesignStore = defineStore("design", {
       }
     },
 
+    // 完成設計，顯示預覽並記錄設計時間
     finishDesign() {
       // 記錄設計時間
       // this.designTime = new Date().toLocaleString("zh-TW", { exportDesign });
@@ -505,8 +326,8 @@ export const useDesignStore = defineStore("design", {
       }, 100);
     },
 
-    exportDesign() {
-      // 匯出設計資料
+    // 匯出設計為 JSON 檔案
+    exportDesign() {      
       const designData = {
         plate: this.currentPlate,
         patterns: this.placedPatterns,
@@ -525,6 +346,7 @@ export const useDesignStore = defineStore("design", {
       // alert(`設計已匯出為 JSON 檔案: plate-design-${this.designId}.json`);
     },
 
+    // 列印設計
     printDesign() {
       window.print();
     },
@@ -647,209 +469,3 @@ export const useDesignStore = defineStore("design", {
     // },
   },
 });
-
-// import { defineStore } from "pinia";
-// import type { Plate, Pattern, PlacedPattern, PlateDesign } from "~~/types";
-// import type { Plate, PlateDesign } from "~~/types";
-
-// export const usePlateDesignerStore = defineStore("plateDesigner", {
-//   state: () => ({
-//     plates: [] as Plate[],
-//     patterns: [] as Pattern[],
-//     currentPlate: null as Plate | null,
-//     placedPatterns: [] as PlacedPattern[],
-//     selectedPattern: null as PlacedPattern | null,
-//     designHistory: [] as PlateDesign[],
-//     backgroundColor: "#FFFFFF",
-//     previewMode: false,
-//   }),
-
-//   getters: {
-//     getPlateById: (state) => (id: string) => state.plates.find((plate) => plate.id === id),
-
-//     getPatternById: (state) => (id: string) => state.patterns.find((pattern) => pattern.id.toString() === id),
-
-//     totalPatternsCount: (state) => state.placedPatterns.length,
-
-//     designPrice: (state) => {
-//       if (!state.currentPlate) return 0;
-//       const basePrice = state.currentPlate.price;
-//       const patternPrice = state.placedPatterns.length * 5; // 每個圖案加5元
-//       return basePrice + patternPrice;
-//     },
-//   },
-
-//   actions: {
-//     async loadPlates() {
-//       // 模擬API調用
-//       this.plates = [
-//         {
-//           id: "1",
-//           name: "經典白瓷盤",
-//           type: "round",
-//           size: { width: 300, height: 300 },
-//           color: "#F5F5DC",
-//           // image: "/images/plates/round-ceramic.png",
-//           icon: "fas fa-circle",
-//           iconColor: "#f0f0f0",
-//           price: 199,
-//         },
-//         {
-//           id: "2",
-//           name: "木紋盤",
-//           type: "square",
-//           size: { width: 250, height: 250 },
-//           color: "#DEB887",
-//           // image: "/images/plates/square-wood.png",
-//           icon: "fas fa-circle",
-//           iconColor: "#d4b483",
-//           price: 249,
-//         },
-//         {
-//           id: "3",
-//           name: "橢圓大理石盤",
-//           type: "oval",
-//           size: { width: 350, height: 200 },
-//           color: "#C0C0C0",
-//           // image: "/images/plates/oval-marble.png",
-//           icon: "fas fa-circle",
-//           iconColor: "#D2691E",
-//           price: 399,
-//         },
-//       ];
-
-//       if (this.plates.length > 0 && !this.currentPlate) {
-//         if (this.plates[0]) {
-//           this.currentPlate = this.plates[0];
-//         }
-//       }
-//     },
-
-//     async loadPatterns() {
-//       // 模擬圖案數據
-//       this.patterns = [
-//         {
-//           id: "p1",
-//           name: "玫瑰花",
-//           category: "flower",
-//           svg: '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#FF6B6B"/></svg>',
-//           thumbnail: "/images/patterns/rose.svg",
-//           defaultSize: 50,
-//           color: "#FF6B6B",
-//         },
-//         {
-//           id: "p2",
-//           name: "幾何圖形",
-//           category: "geometric",
-//           svg: '<svg viewBox="0 0 100 100"><polygon points="50,5 95,35 95,85 50,115 5,85 5,35" fill="#4ECDC4"/></svg>',
-//           thumbnail: "/images/patterns/hexagon.svg",
-//           defaultSize: 50,
-//           color: "#4ECDC4",
-//         },
-//         {
-//           id: "p3",
-//           name: "動物圖案",
-//           category: "animal",
-//           svg: '<svg viewBox="0 0 100 100"><path d="M50,20 Q70,30 80,50 Q70,70 50,80 Q30,70 20,50 Q30,30 50,20" fill="#FFD166"/></svg>',
-//           thumbnail: "/images/patterns/animal.svg",
-//           defaultSize: 50,
-//           color: "#FFD166",
-//         },
-//       ];
-//     },
-
-//     selectPlate(plateId: string) {
-//       const plate = this.getPlateById(plateId);
-//       if (plate) {
-//         this.currentPlate = plate;
-//       }
-//     },
-
-//     addPattern(patternId: string) {
-//       const pattern = this.getPatternById(patternId);
-//       if (!pattern || !this.currentPlate) return;
-
-//       const placedPattern: PlacedPattern = {
-//         id: `placed-${Date.now()}`,
-//         patternId: pattern.id,
-//         image: pattern.image,
-//         name: pattern.name,
-//         x: this.currentPlate.size.width / 2 - pattern.defaultSize / 2,
-//         y: this.currentPlate.size.height / 2 - pattern.defaultSize / 2,
-//         rotation: 0,
-//         scale: 1,
-//         zIndex: this.placedPatterns.length + 1,
-//         selected: false,
-//       };
-
-//       this.placedPatterns.push(placedPattern);
-//     },
-
-//     updatePatternPosition(patternId: string, x: number, y: number) {
-//       const pattern = this.placedPatterns.find((p) => p.id === patternId);
-//       if (pattern) {
-//         pattern.x = x;
-//         pattern.y = y;
-//       }
-//     },
-
-//     updatePatternRotation(patternId: string, rotation: number) {
-//       const pattern = this.placedPatterns.find((p) => p.id === patternId);
-//       if (pattern) {
-//         pattern.rotation = rotation;
-//       }
-//     },
-
-//     updatePatternScale(patternId: string, scale: number) {
-//       const pattern = this.placedPatterns.find((p) => p.id === patternId);
-//       if (pattern) {
-//         pattern.scale = scale;
-//       }
-//     },
-
-//     selectPattern(patternId: string) {
-//       this.placedPatterns.forEach((p) => {
-//         p.selected = p.id === patternId;
-//       });
-//       this.selectedPattern = this.placedPatterns.find((p) => p.id === patternId) || null;
-//     },
-
-//     deletePattern(patternId: string) {
-//       const index = this.placedPatterns.findIndex((p) => p.id === patternId);
-//       if (index !== -1) {
-//         this.placedPatterns.splice(index, 1);
-//         if (this.selectedPattern?.id === patternId) {
-//           this.selectedPattern = null;
-//         }
-//       }
-//     },
-
-//     clearAllPatterns() {
-//       this.placedPatterns = [];
-//       this.selectedPattern = null;
-//     },
-
-//     saveDesign() {
-//       if (!this.currentPlate) return;
-
-//       const design: PlateDesign = {
-//         plateId: this.currentPlate.id,
-//         plateType: this.currentPlate.type,
-//         patterns: [...this.placedPatterns],
-//         backgroundColor: this.backgroundColor,
-//         createdAt: new Date(),
-//       };
-
-//       this.designHistory.unshift(design);
-//       return design;
-//     },
-
-//     setBackgroundColor(color: string) {
-//       this.backgroundColor = color;
-//     },
-
-//     togglePreviewMode() {
-//       this.previewMode = !this.previewMode;
-//     },
-//   },
-// });
