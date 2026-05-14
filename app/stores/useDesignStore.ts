@@ -173,6 +173,7 @@ export const useDesignStore = defineStore("design", {
           height: pattern.size.height,
         },
         rotation: 0,
+        angle: 0,
         scale: 1,
         zIndex: this.placedPatterns.length + 1,
         selected: false,

@@ -9,12 +9,14 @@
     <div class="canvas-wrapper">
       <div class="flex flex-col items-center">
         <!-- 盤子背景 -->
-        <div ref="plateContainer" class="relative shadow-lg" :style="{
-          background: currentPlate?.image ? `url(${currentPlate.image}) no-repeat center / contain` : '#ffffff',
+        <div ref="plateContainerRef" class="relative shadow-lg" :style="{
+          background: currentPlate?.image
+            ? `url(${currentPlate.image}) no-repeat center / contain`
+            : '#ffffff',
           width: currentPlate?.size.width * 2 + 'px',
           height: currentPlate?.size.height * 2 + 'px',
-        }" style="background-origin: content-box;background-clip: content-box;padding: 10px"
-          @click="clearSelection">
+          padding: 10 + 'px'
+        }" @click="clearSelection">
           <div v-if="placedPatterns.length === 0"
             class="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
             <i class="i-mdi-plus-circle text-6xl mb-4 opacity-30"></i>
@@ -25,12 +27,9 @@
             :class="{ selected: pattern.selected }" :style="{
               left: pattern.x + 'px',
               top: pattern.y + 'px',
-              transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
+              transform: `rotate(${pattern.rotation}deg)`,
               fontSize: getPatternSize(pattern.patternId) + 'px',
-              // width: pattern.size.width* 2 + 'px',
-              // height: pattern.size.height* 2 + 'px',
-            }" @mousedown="startDrag(pattern.id, $event)" @click="selectPatternOnPlate(pattern.id)">
-
+            }" @mousedown="startDrag(pattern.id, $event)">
             <div class="pattern-item" v-html="getPatternSvg(pattern.patternId)" :style="{
               width: pattern.size.width * 2 + 'px',
               height: pattern.size.height * 2 + 'px',
@@ -40,10 +39,10 @@
               <!-- <button class="control-btn rotate" @mousedown.stop="startRotate(pattern.id, $event)" @touchstart.stop="startRotate(pattern.id, $event)">
                 <Icon name="ic:baseline-cached" class="text-blue-500" />
               </button> -->
-              <button class="control-btn rotate" @click.stop="rotatePattern(pattern.id)">
+              <button class="rotate-handle" @mousedown.stop="startRotate(pattern.id, $event)">
                 <Icon name="ic:baseline-cached" class="text-blue-500" />
               </button>
-              <button class="control-btn delete" @click.stop="removePattern(pattern.id)">
+              <button class="delete-btn" @click.stop="removePattern(pattern.id)">
                 <Icon name="ic:baseline-close" class="text-red-500" />
               </button>
             </div>
@@ -102,28 +101,36 @@ const designStore = useDesignStore();
 const currentPlate = computed(() => designStore.currentPlate);
 const placedPatterns = computed(() => designStore.placedPatterns);
 const selectedPattern = computed(() => designStore.selectedPattern);
-const patterns = computed(() => designStore.patterns);
+// const patterns = computed(() => designStore.patterns);
 
-const plateSize = computed(() => currentPlate.value?.size || { width: 300, height: 300 });
+// const plateSize = computed(() => currentPlate.value?.size || { width: 300, height: 300 });
 
-const rotationValue = ref(0);
-const scaleValue = ref(1);
-const backgroundColor = ref("#FFFFFF");
+// const rotationValue = ref(0);
+// const scaleValue = ref(1);
+// const backgroundColor = ref("#FFFFFF");
 
 // 預定義顏色
-const predefinedColors = ["#FFFFFF", "#F5F5DC", "#FFF8DC", "#FAEBD7", "#FFE4C4", "#DEB887", "#D2B48C"];
+// const predefinedColors = [
+//   "#FFFFFF",
+//   "#F5F5DC",
+//   "#FFF8DC",
+//   "#FAEBD7",
+//   "#FFE4C4",
+//   "#DEB887",
+//   "#D2B48C",
+// ];
 
 const clearSelection = () => {
   designStore.patterns.forEach((p) => (p.selected = false));
 };
 
 // 監聽選擇的圖案變化
-watch(selectedPattern, (newPattern) => {
-  if (newPattern) {
-    rotationValue.value = newPattern.rotation;
-    scaleValue.value = newPattern.scale;
-  }
-});
+// watch(selectedPattern, (newPattern) => {
+//   if (newPattern) {
+//     rotationValue.value = newPattern.rotation;
+//     scaleValue.value = newPattern.scale;
+//   }
+// });
 
 // watch(currentPlate, (newPlate) => {
 //   if (newPlate) {
@@ -131,7 +138,7 @@ watch(selectedPattern, (newPattern) => {
 //   }
 // });
 
-// 方法
+// 建立圖片元素的 SVG 內容
 const getPatternSvg = (patternId: string) => {
   const pattern = designStore.getPatternById(patternId);
   return `<img src="${pattern?.image}" />`;
@@ -144,63 +151,166 @@ const getPatternSize = (patternId: string) => {
 };
 
 // 選擇盤子上的圖案
-const selectPatternOnPlate = (patternId: string) => {
-  designStore.selectPattern(patternId);
+// const selectPatternOnPlate = (patternId: string) => {
+//   designStore.selectPattern(patternId);
+// };
+const plateContainerRef = ref<HTMLElement | null>(null);
+// 拖曳相關變數
+// const isDragging = ref(false);
+let isDragging = false;
+let dragTargetId: string | null = null;
+let dragStartX = 0, dragStartY = 0;
+let originalLeft = 0, originalTop = 0;
+// const dragPatternId = ref(null);
+// const dragStart = ref({ x: 0, y: 0 });
+// const patternStart = ref({ x: 0, y: 0 });
+
+// 获取盘子容器尺寸 
+const getContainerRect = () => {
+  if (!plateContainerRef.value) return;
+  const rect = plateContainerRef.value.getBoundingClientRect();
+  return rect;
 };
 
-// 拖曳相關變數
-const isDragging = ref(false);
-const dragPatternId = ref(null);
-const dragStart = ref({ x: 0, y: 0 });
-const patternStart = ref({ x: 0, y: 0 });
+// 更新图案位置
+const updatePatternPosition = (id: any, newLeft: number, newTop: number) => {
+  // const pattern = patterns.value.find(p => p.id === id);
+  if (!selectedPattern.value) return;
+  const containerRect = getContainerRect();
+  if (!containerRect) return;
+  const maxLeft = containerRect.width - selectedPattern.value.size.width;
+  const maxTop = containerRect.height - selectedPattern.value.size.height;
+  selectedPattern.value.x = Math.min(Math.max(0, newLeft), maxLeft);
+  selectedPattern.value.y = Math.min(Math.max(0, newTop), maxTop);
+};
+
+// 更新图案角度
+const updatePatternAngle = (id: any, newAngleDeg: any) => {
+  // const pattern = patterns.value.find(p => p.id === id);
+  if (!selectedPattern.value) return;
+  // 确保角度在 0~360 范围，但不影响体验
+  selectedPattern.value.rotation = ((newAngleDeg % 360) + 360) % 360;
+};
+
+// 获取图案中心点在屏幕上的坐标（相对于浏览器视口）
+const getPatternScreenCenter = (pattern: any) => {
+  if (!plateContainerRef.value) return null;
+  const containerRect = getContainerRect();
+  if (!containerRect) return;
+  // 图案在容器内的绝对坐标 left, top (未旋转时的位置)
+  const absLeft = containerRect.left + pattern.x;
+  const absTop = containerRect.top + pattern.y;
+  const centerX = absLeft + pattern.size.width / 2;
+  const centerY = absTop + pattern.size.height / 2;
+  return { x: centerX, y: centerY };
+};
+
 // 開始拖曳圖案
 const startDrag = (patternId: any, event: any) => {
-  isDragging.value = true;
-  dragPatternId.value = patternId;
-  dragStart.value = { x: event.clientX, y: event.clientY };
-
-  const pattern = placedPatterns.value.find((p) => p.id === patternId);
-  if (pattern) {
-    // patternStart.value = { ...pattern?.position };
-    patternStart.value = { x: pattern.x, y: pattern.y };
-    designStore.selectedPattern = pattern;
-  }
-
-  // 添加全局事件監聽器
-  document.addEventListener("mousemove", handleDrag);
-  document.addEventListener("mouseup", stopDrag);
+  designStore.selectPattern(patternId);
+  // event.stopPropagation();
+  // const pattern = patterns.value.find(p => p.id === id);
+  // if (!pattern) return;
+  if (!selectedPattern.value) return;
+  if (event.target.classList && (event.target.classList.contains('delete-btn') || event.target.classList.contains('rotate-handle'))) return;
+  dragTargetId = patternId;
+  dragStartX = event.clientX;
+  dragStartY = event.clientY;
+  originalLeft = selectedPattern.value.x;
+  originalTop = selectedPattern.value.y;
+  isDragging = true;
+  document.body.style.cursor = 'grabbing';
+  event.preventDefault();
 };
+
+// const startDrag = (patternId: any, event: any) => {
+//   designStore.selectPattern(patternId);
+
+//   isDragging.value = true;
+//   dragPatternId.value = patternId;
+//   dragStart.value = { x: event.clientX, y: event.clientY };
+
+//   const pattern = placedPatterns.value.find((p) => p.id === patternId);
+//   if (pattern) {
+//     // patternStart.value = { ...pattern?.position };
+//     patternStart.value = { x: pattern.x, y: pattern.y };
+//     designStore.selectedPattern = pattern;
+//   }
+
+//   // // 添加全局事件監聽器
+//   // document.addEventListener("mousemove", handleDrag);
+//   // document.addEventListener("mouseup", stopDrag);
+// };
 
 // 處理拖曳
-const handleDrag = (event: any) => {
-  if (!isDragging.value || !dragPatternId.value) return;
+// const handleDrag = (event: any) => {
+//   if (!isDragging.value || !dragPatternId.value) return;
 
-  const deltaX = event.clientX - dragStart.value.x;
-  const deltaY = event.clientY - dragStart.value.y;
+//   const deltaX = event.clientX - dragStart.value.x;
+//   const deltaY = event.clientY - dragStart.value.y;
 
-  const patternIndex = placedPatterns.value.findIndex((p) => p.id === dragPatternId.value);
-  if (patternIndex !== -1) {
-    const newX = patternStart.value.x + deltaX;
-    const newY = patternStart.value.y + deltaY;
+//   const patternIndex = placedPatterns.value.findIndex(
+//     (p) => p.id === dragPatternId.value
+//   );
+//   if (patternIndex !== -1) {
+//     const newX = patternStart.value.x + deltaX;
+//     const newY = patternStart.value.y + deltaY;
 
-    // 確保圖案不會超出盤子邊界
-    const maxX = plateSize.value.width * 2 - getPatternSize(placedPatterns.value[patternIndex].patternId);
-    const maxY = plateSize.value.height * 2 - getPatternSize(placedPatterns.value[patternIndex].patternId);
+//     // 確保圖案不會超出盤子邊界
+//     const maxX =
+//       plateSize.value.width * 2 -
+//       getPatternSize(placedPatterns.value[patternIndex].patternId);
+//     const maxY =
+//       plateSize.value.height * 2 -
+//       getPatternSize(placedPatterns.value[patternIndex].patternId);
 
-    placedPatterns.value[patternIndex].x = Math.max(0, Math.min(newX, maxX));
-    placedPatterns.value[patternIndex].y = Math.max(0, Math.min(newY, maxY));
-  }
-};
+//     placedPatterns.value[patternIndex].x = Math.max(0, Math.min(newX, maxX));
+//     placedPatterns.value[patternIndex].y = Math.max(0, Math.min(newY, maxY));
+//   }
+// };
 
 // 停止拖曳
-const stopDrag = () => {
-  isDragging.value = false;
-  dragPatternId.value = null;
+// const stopDrag = () => {
+//   isDragging.value = false;
+//   dragPatternId.value = null;
 
-  // 移除全局事件監聽器
-  document.removeEventListener("mousemove", handleDrag);
-  document.removeEventListener("mouseup", stopDrag);
+//   // 移除全局事件監聽器
+//   document.removeEventListener("mousemove", handleDrag);
+//   document.removeEventListener("mouseup", stopDrag);
+// };
+
+let rotatingId: string | null = null;
+let startAngleRad = 0;     // 初始鼠标相对于中心点的弧度
+let initialPatternAngle = 0; // 图案初始角度（度）
+let isRotating = false;
+let centerX = 0, centerY = 0; // 图案中心点的屏幕坐标（在旋转开始时记录）
+
+// 旋转开始 (记录鼠标相对于图案中心点的角度)
+const startRotate = (patternId: string, event: any) => {
+  designStore.selectPattern(patternId);
+  // event.stopPropagation();
+  // const pattern = patterns.value.find(p => p.id === id);
+  // if (!pattern) return;
+  if (!selectedPattern.value) return;
+  const center = getPatternScreenCenter(selectedPattern.value);
+  if (!center) return;
+
+  const dx = event.clientX - center.x;
+  const dy = event.clientY - center.y;
+  let angleRad = Math.atan2(dy, dx);  // 范围 -PI 到 PI
+
+  rotatingId = patternId;
+  startAngleRad = angleRad;
+  initialPatternAngle = selectedPattern.value.angle;
+  isRotating = true;
+  centerX = center.x;
+  centerY = center.y;
+  document.body.style.cursor = 'grabbing';
+  event.preventDefault();
 };
+
+
+
 
 // 刪除圖案
 const removePattern = (id: string) => {
@@ -210,96 +320,100 @@ const removePattern = (id: string) => {
 // 旋轉圖案
 // let isDragging = false
 let lastAngle = 0;
-let isRotating = ref(false);
-const rotateStart: any = { x: 0, y: 0, startAngle: 0, rotation: 0 };
-const startRotate = (patternId: string, event: any) => {
-  designStore.selectPattern(patternId);
+// let isRotating = ref(false);
+// const rotateStart: any = { x: 0, y: 0, startAngle: 0, rotation: 0 };
+// const startRotate = (patternId: string, event: any) => {
+//   designStore.selectPattern(patternId);
 
-  // isDragging.value = true;
-  // lastAngle = getAngle(e);
-  // document.addEventListener("mousemove", onDrag);
-  // document.addEventListener("mouseup", stopDrag);
+//   // isDragging.value = true;
+//   // lastAngle = getAngle(e);
+//   // document.addEventListener("mousemove", onDrag);
+//   // document.addEventListener("mouseup", stopDrag);
 
-  // this.selectedPatternIndex = index;
-  isRotating.value = true;
+//   // this.selectedPatternIndex = index;
+//   // isRotating.value = true;
 
-  // const pattern = this.patternsOnPlate[index];
-  const rect = event.target.closest(".plate-container").getBoundingClientRect();
+//   // const pattern = this.patternsOnPlate[index];
+//   const rect = event.target.closest(".plate-container").getBoundingClientRect();
 
-  let clientX, clientY;
+//   let clientX, clientY;
 
-  if (event.type.includes("touch")) {
-    clientX = event.touches[0].clientX;
-    clientY = event.touches[0].clientY;
-  } else {
-    clientX = event.clientX;
-    clientY = event.clientY;
-  }
+//   if (event.type.includes("touch")) {
+//     clientX = event.touches[0].clientX;
+//     clientY = event.touches[0].clientY;
+//   } else {
+//     clientX = event.clientX;
+//     clientY = event.clientY;
+//   }
 
-  // 計算圖案中心點
-  const centerX = rect.left + (designStore.selectedPattern?.x ?? 0) + (designStore.selectedPattern?.size?.width ?? 0) / 2;
-  const centerY = rect.top + (designStore.selectedPattern?.y ?? 0) + (designStore.selectedPattern?.size?.height ?? 0) / 2;
+//   // 計算圖案中心點
+//   const centerX = rect.left += (designStore.selectedPattern?.x ?? 0) + (designStore.selectedPattern?.size?.width ?? 0);
+//   const centerY = rect.top + (designStore.selectedPattern?.y ?? 0) + (designStore.selectedPattern?.size?.height ?? 0);
 
-  // 計算起始角度
-  const startAngle = Math.atan2(clientY - centerY, clientX - centerX);
+//   // 計算起始角度
+//   const startAngle = Math.atan2(clientY - centerY, clientX - centerX);
 
-  rotateStart.value = {
-    x: centerX,
-    y: centerY,
-    startAngle: startAngle,
-    rotation: designStore.selectedPattern?.rotation ?? 0,
-  };
+//   rotateStart.value = {
+//     patternId: patternId,
+//     x: centerX,
+//     y: centerY,
+//     startAngle: startAngle,
+//     rotation: designStore.selectedPattern?.rotation ?? 0,
+//   };
 
-  document.addEventListener("mousemove", doRotate);
-  document.addEventListener("mouseup", stopRotate);
-  document.addEventListener("touchmove", doRotate, { passive: false });
-  document.addEventListener("touchend", stopRotate);
+// document.addEventListener("mousemove", doRotate);
+// document.addEventListener("mouseup", stopRotate);
+// document.addEventListener("touchmove", doRotate, { passive: false });
+// document.addEventListener("touchend", stopRotate);
 
-  if (event.type.includes("touch")) {
-    event.preventDefault();
-  }
-  // const pattern = designStore.patterns[patternIndex];
-  // const plateContainer = document.querySelector(".plate-container");
-  // if (!plateContainer) return;
+// if (event.type.includes("touch")) {
+//   event.preventDefault();
+// }
+// const pattern = designStore.patterns[patternIndex];
+// const plateContainer = document.querySelector(".plate-container");
+// if (!plateContainer) return;
 
-  // const rect = plateContainer.getBoundingClientRect();
+// const rect = plateContainer.getBoundingClientRect();
 
-  // const centerX = rect.left + pattern.x + pattern.width / 2;
-  // const centerY = rect.top + pattern.y + pattern.height / 2;
+// const centerX = rect.left + pattern.x + pattern.width / 2;
+// const centerY = rect.top + pattern.y + pattern.height / 2;
 
-  // const startAngle = Math.atan2(event.clientY - centerY, event.clientX - centerX);
+// const startAngle = Math.atan2(event.clientY - centerY, event.clientX - centerX);
 
-  // rotateData.value = {
-  //   patternIndex,
-  //   startRotation: pattern.rotation,
-  //   centerX,
-  //   centerY,
-  //   startAngle,
-  // };
+// rotateData.value = {
+//   patternIndex,
+//   startRotation: pattern.rotation,
+//   centerX,
+//   centerY,
+//   startAngle,
+// };
 
-  // document.addEventListener("mousemove", doRotate);
-  // document.addEventListener("mouseup", stopRotate);
-};
+// document.addEventListener("mousemove", doRotate);
+// document.addEventListener("mouseup", stopRotate);
+// };
 
-const doRotate = (event: any) => {
-  // if (!rotateData.value) return;
+// const doRotate = (event: any) => {
+//   // if (!rotateData.value) return;
 
-  // const start = rotateData.value;
-  const currentAngle = Math.atan2(event.clientY - rotateStart.centerY, event.clientX - rotateStart.x);
+//   // const start = rotateData.value;
+//   const currentAngle = Math.atan2(
+//     event.clientY - rotateStart.centerY,
+//     event.clientX - rotateStart.x
+//   );
 
-  const angleDiff = (currentAngle - rotateStart.startAngle) * (180 / Math.PI);
+//   const angleDiff = (currentAngle - rotateStart.startAngle) * (180 / Math.PI);
 
-  let newRotation = (rotateStart.rotation + angleDiff) % 360;
-  if (newRotation < 0) newRotation += 360;
+//   let newRotation = (rotateStart.rotation + angleDiff) % 360;
+//   if (newRotation < 0) newRotation += 360;
 
-  designStore.updatePatternRotation(rotateStart.patternId, newRotation);
-};
+//   designStore.updatePatternRotation(rotateStart.patternId, newRotation);
+// };
 
-const stopRotate = () => {
-  rotateStart.value = null;
-  document.removeEventListener("mousemove", doRotate);
-  document.removeEventListener("mouseup", stopRotate);
-};
+// const stopRotate = () => {
+//   rotateStart.value = null;
+//   document.removeEventListener("mousemove", doRotate);
+//   document.removeEventListener("mouseup", stopRotate);
+// };
 
 // 取得相對於圖案中心的角度
 // const getAngle = (event: any) => {
@@ -312,15 +426,15 @@ const stopRotate = () => {
 //   return Math.atan2(dy, dx) * (180 / Math.PI);
 // };
 
-const rotatePattern = (patternId: string) => {
-  const patternIndex = placedPatterns.value.findIndex((p) => p.id === patternId);
-  if (patternIndex !== -1) {
-    placedPatterns.value[patternIndex].rotation += 45;
-    if (placedPatterns.value[patternIndex].rotation >= 360) {
-      placedPatterns.value[patternIndex].rotation = 0;
-    }
-  }
-};
+// const rotatePattern = (patternId: string) => {
+//   const patternIndex = placedPatterns.value.findIndex((p) => p.id === patternId);
+//   if (patternIndex !== -1) {
+//     placedPatterns.value[patternIndex].rotation += 45;
+//     if (placedPatterns.value[patternIndex].rotation >= 360) {
+//       placedPatterns.value[patternIndex].rotation = 0;
+//     }
+//   }
+// };
 
 // const updatePatternPosition = (patternId: string, x: number, y: number) => {
 //   designStore.updatePatternPosition(patternId, x, y);
@@ -382,6 +496,66 @@ const rotatePattern = (patternId: string) => {
 // 初始化
 // designStore.loadPlates();
 // designStore.loadPatterns();
+
+// 全局事件處理
+const onGlobalMouseMove = (e: any) => {
+  if (isDragging && selectedPattern.value && selectedPattern.value.id !== null) {
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+    const newLeft = originalLeft + dx;
+    const newTop = originalTop + dy;
+    updatePatternPosition(dragTargetId, newLeft, newTop);
+  }
+  else if (isRotating && rotatingId !== null) {
+    // 计算当前鼠标相对于原图案中心的角度
+    const dx = e.clientX - centerX;
+    const dy = e.clientY - centerY;
+    let currentAngleRad = Math.atan2(dy, dx);
+    // 角度差（弧度）
+    let deltaRad = currentAngleRad - startAngleRad;
+    // 转换为度数
+    let deltaDeg = deltaRad * 180 / Math.PI;
+    let newAngle = initialPatternAngle + deltaDeg;
+    // 保持角度在 0~360 范围便于显示
+    newAngle = ((newAngle % 360) + 360) % 360;
+    updatePatternAngle(rotatingId, newAngle);
+  }
+};
+
+const onGlobalMouseUp = () => {
+  if (isDragging) {
+    isDragging = false;
+    dragTargetId = null;
+  }
+  if (isRotating) {
+    isRotating = false;
+    rotatingId = null;
+  }
+  document.body.style.cursor = 'default';
+};
+
+const handleWindowResize = () => {
+  if (!plateContainerRef.value) return;
+  const containerRect = plateContainerRef.value.getBoundingClientRect();
+  placedPatterns.value.forEach(p => {
+    const maxLeft = containerRect.width - p.size.width;
+    const maxTop = containerRect.height - p.size.height;
+    p.x = Math.min(Math.max(0, p.x), maxLeft);
+    p.y = Math.min(Math.max(0, p.y), maxTop);
+  });
+};
+
+onMounted(() => {
+  window.addEventListener('mousemove', onGlobalMouseMove);
+  window.addEventListener('mouseup', onGlobalMouseUp);
+  window.addEventListener('resize', handleWindowResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('mousemove', onGlobalMouseMove);
+  window.removeEventListener('mouseup', onGlobalMouseUp);
+  window.removeEventListener('resize', handleWindowResize);
+});
 </script>
 
 <style scoped>
@@ -459,10 +633,10 @@ const rotatePattern = (patternId: string) => {
 
 .pattern-on-plate {
   position: absolute;
-  cursor: move;
-  user-select: none;
-  transition: transform 0.2s ease;
-  z-index: 10;
+  cursor: grab;
+  will-change: left, top, transform;
+  transition: box-shadow 0.1s;
+  transform-origin: center center;
 }
 
 .pattern-on-plate.selected {
@@ -497,12 +671,9 @@ const rotatePattern = (patternId: string) => {
 } */
 
 /* 設計按鈕 */
-.control-btn {
-  /* width: 30px;
-  height: 30px; */
+/* .control-btn {
   border-radius: 50%;
   border: none;
-  /* background: #3498db; */
   color: white;
   cursor: pointer;
   display: flex;
@@ -513,25 +684,68 @@ const rotatePattern = (patternId: string) => {
 }
 
 .control-btn:hover {
-  /* background: #2980b9; */
   transform: scale(1.8);
 }
 
-.control-btn.delete {
-  /* background: #e74c3c; */
-}
-
-.control-btn.delete:hover {
-  /* background: #c0392b; */
-}
-
-.control-btn.rotate {
-  /* background: #2ecc71; */
-}
-
 .control-btn.rotate:hover {
-  /* background: #27ae60; */
   cursor: pointer;
+} */
+
+.rotate-handle {
+  position: absolute;
+  /* bottom: -12px; */
+  right: 40px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  z-index: 20;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  transition: 0.1s;
+}
+
+.rotate-handle:active {
+  cursor: grabbing;
+  background: #d3e9f8;
+}
+
+.rotate-handle:hover {
+  /* background: #ffaa44; */
+  transform: scale(1.1);
+}
+
+.delete-btn {
+  position: absolute;
+  /* top: -12px;s */
+  right: -40px;
+  width: 26px;
+  height: 26px;
+  /* background: #ff5e6c; */
+  border-radius: 50%;
+  border: 2px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  transition: 0.1s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+  font-family: monospace;
+}
+
+.delete-btn:hover {
+  background: #f8d0d4;
+  transform: scale(1.1);
 }
 
 @media (max-width: 1200px) {

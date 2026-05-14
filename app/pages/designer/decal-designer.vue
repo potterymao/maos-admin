@@ -54,7 +54,7 @@
 <script setup lang="ts">
 import { useDesignStore } from "~/stores/useDesignStore";
 
-const { startDrag, startResize, startRotate } = usePlateDesigner();
+// const { startDrag, startResize, startRotate } = usePlateDesigner();
 
 const designStore = useDesignStore();
 </script>

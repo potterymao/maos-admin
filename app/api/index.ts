@@ -1,11 +1,5 @@
 // import error from "#build/ui/error";
 
-const BASE_URL = "https://open.shopline.io/v1";
-const auth_token = "2f02e2666086ad2bfe21a1ecaff1d6ffbfef1acdb377206570a70275deb6e929";
-const plate_id = "69a91f41436917d8cc011bac";
-const pattern_id = "69a91f9a1936bba5ce715660";
-const merchant_id = "69f1c86a034e73fbf686e315";
-
 // const getPlateFields = ref(["items.id", "items.title_translations", "items.lowest_price", "items.medias"]);
 // const getPatternFields = ref(["items.id", "items.title_translations", "items.lowest_price"]);
 // export const useFetchPatterns = () => {

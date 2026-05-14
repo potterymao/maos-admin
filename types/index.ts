@@ -124,6 +124,7 @@ export interface PlacedPattern {
     height: number;
   };
   rotation: number;
+  angle: number;
   scale: number;
   zIndex: number;
   selected: boolean;

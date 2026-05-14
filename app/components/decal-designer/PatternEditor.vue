@@ -24,22 +24,11 @@
       <!-- 列表 -->
       <div class="control-group">
         <div class="flex flex-wrap gap-2 mt-4">
-          <div
-            v-for="(pattern, index) in placedPatterns"
-            :key="pattern.id"
-            class="pattern-item w-full"
-            :class="{ selected: selectedPattern?.id === pattern.id }"
-            @click="selectPatternOnPlate(pattern.id)"
-          >
+          <div v-for="(pattern, index) in placedPatterns" :key="pattern.id" class="pattern-item w-full"
+            :class="{ selected: selectedPattern?.id === pattern.id }" @click="selectPatternOnPlate(pattern.id)">
             <div class="pattern-item-index">{{ index + 1 }}</div>
             <div class="pattern-item-name">{{ appStore.locale === "zh-TW" ? pattern?.name_zh : pattern?.name_en }}</div>
             <span class="text-blue-400 text-[14px]">$ {{ pattern?.price }}</span>
-            <!-- <el-button type="danger" @click="removePattern">
-              <Icon name="material-symbols:delete-forever-rounded" class="text-[20px]" />
-            </el-button> -->
-            <!-- <button class="pattern-item-remove" @click.stop="removePattern">
-              <Icon name="material-symbols:delete-forever-rounded" class="text-[20px] text-red-500" />
-            </button> -->
           </div>
         </div>
       </div>
@@ -87,28 +76,6 @@
               {{ $t("_designer.move_down") }}
             </el-button>
           </div>
-          <!-- <div class="grid grid-cols-2 gap-2">
-          <el-button type="primary" @click="centerPattern">
-            <i class="i-mdi-bullseye mr-1"></i>
-            置中
-          </el-button>
-          <el-button @click="movePattern(-10, 0)">
-            <i class="i-mdi-arrow-left mr-1"></i>
-            左移
-          </el-button>
-          <el-button @click="movePattern(10, 0)">
-            <i class="i-mdi-arrow-right mr-1"></i>
-            右移
-          </el-button>
-          <el-button @click="movePattern(0, -10)">
-            <i class="i-mdi-arrow-up mr-1"></i>
-            上移
-          </el-button>
-          <el-button @click="movePattern(0, 10)">
-            <i class="i-mdi-arrow-down mr-1"></i>
-            下移
-          </el-button>
-        </div> -->
         </div>
 
         <!-- 圖層控制 -->
@@ -126,7 +93,6 @@
               {{ $t("_designer.layer_bottom") }}
             </el-button>
             <el-button @click="bringForward">
-              <!-- <i class="i-mdi-chevron-down mr-1"></i> -->
               <Icon name="material-symbols:keyboard-arrow-up-rounded" class="text-[20px] mr-1" />
               {{ $t("_designer.layer_up") }}
             </el-button>
@@ -247,7 +213,7 @@ const sendBackward = () => {
   transform: translateY(-2px);
 }
 
-.el-button + .el-button {
+.el-button+.el-button {
   margin-left: unset;
 }
 
@@ -290,6 +256,7 @@ const sendBackward = () => {
   flex-grow: 1;
   font-weight: 500;
 }
+
 /* .panel-title {
   font-size: 1.3rem;
   color: #2c3e50;

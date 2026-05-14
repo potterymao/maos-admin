@@ -111,18 +111,6 @@ const getPatterns = async () => {
           })
         }
       }
-      // patternsData.push({
-      //   id: item.id,
-      //   name_en: item.title_translations["en"],
-      //   name_zh: item.title_translations["zh-hant"],
-      //   price: item.price.dollar || 0,
-      //   type: item.type,
-      //   category: item.category_id,
-      //   // image: item.medias?.[0]?.images.source.url || "",
-      //   image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
-      //   size: { width: 50, height: 50 },
-      //   defaultSize: null,
-      // });
     }
     patterns.value = patternsData; // 直接更新本地 patterns 變數
     designStore.SetPatterns(patternsData);
