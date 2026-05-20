@@ -33,12 +33,12 @@ export const useDesignStore = defineStore("design", {
 
     getPatternById: (state) => (id: string) => state.patterns.find((pattern) => pattern?.id.toString() === id),
 
-    totalPatternsCount: (state) => state.addToCartPatterns.length,
+    totalPatternsCount: (state) => state.totalCartPatterns.length,
 
     designPrice: (state) => {
       if (!state.currentMainPlate) return 0;
       const basePrice = state.currentMainPlate.price;
-      const patternPrice = state.addToCartPatterns ? state.addToCartPatterns.reduce((sum, item) => sum + item.price, 0) : 0;
+      const patternPrice = state.totalCartPatterns ? state.totalCartPatterns.reduce((sum, item) => sum + item.price, 0) : 0;
       return basePrice + patternPrice;
     },
   },
