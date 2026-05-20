@@ -326,8 +326,13 @@ const downloadImage = async () => {
 const finishDesign = async () => {
   // ElMessage.success("感謝您的設計！我們將盡快與您聯繫確認訂單細節。");
 
-  console.log(designStore.addToCartPatterns);
-  const response = await AddToCart(designStore.addToCartPatterns);
+  // console.log(designStore.addToCartPatterns);
+  designStore.addToCart.push({
+    id: designStore.currentMainPlate?.id,
+    variation_id: designStore.currentMainPlate?.children[0]?.id,
+  })
+
+  const response = await AddToCart(designStore.addToCart);
   if (response) {
     window.open(response.link, "_blank");
     ElMessage.success("已成功加入購物車！");

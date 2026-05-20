@@ -21,7 +21,7 @@ export const useDesignStore = defineStore("design", {
     selectedPattern: null as PlacedPattern | null,
 
     // designHistory: [] as PlateDesign[],
-    addToCartPatterns: [] as any[],
+    addToCart: [] as any[],
     totalCartPatterns: [] as any[],
     loading: false,
     error: null as string | null,
@@ -175,13 +175,13 @@ export const useDesignStore = defineStore("design", {
         rotation: 0,
         angle: 0,
         scale: 1,
-        zIndex: this.addToCartPatterns.length + 1,
+        zIndex: this.totalCartPatterns.length + 1,
         selected: false,
       };
 
       this.totalPatterns[this.currentPlateIndex].push(placedPattern);
 
-      this.addToCartPatterns.push({
+      this.addToCart.push({
         id: pattern.parent_id,
         variation_id: pattern.id,
       });
