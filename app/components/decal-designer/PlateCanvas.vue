@@ -7,44 +7,48 @@
     </div>
 
     <div class="canvas-wrapper">
-      <div class="flex flex-col items-center">
+      <div class=" flex flex-col items-center">
         <!-- 盤子背景 -->
-        <div ref="plateContainerRef" class="relative shadow-lg" :style="{
-          background: currentPlate?.image
-            ? `url(${currentPlate.image}) no-repeat center / contain`
-            : '#ffffff',
-          width: currentPlate?.size.width * 2 + 'px',
-          height: currentPlate?.size.height * 2 + 'px',
-          padding: 10 + 'px'
-        }" @click="clearSelection">
-          <div v-if="placedPatterns.length === 0"
+        <div ref="plateContainerRef" class="plate-container relative" :class="{ 'flipped': designStore.isFlipped }"
+          :style="{
+            background: currentPlate?.image
+              ? `url(${currentPlate.image}) no-repeat center / contain`
+              : '#ffffff',
+            width: currentPlate?.size.width * 2 + 'px',
+            height: currentPlate?.size.height * 2 + 'px',
+            padding: '10px',
+
+          }" @click="clearSelection">
+          <!-- <div v-if="placedPatterns.length === 0"
             class="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
             <i class="i-mdi-plus-circle text-6xl mb-4 opacity-30"></i>
             <p class="text-lg">點擊左側圖案添加到盤子上</p>
-          </div>
+          </div> -->
+          <div :class="{ 'pattern-back': designStore.isFlipped }">
 
-          <div v-for="pattern in placedPatterns" :key="pattern.id" class="pattern-on-plate"
-            :class="{ selected: pattern.selected }" :style="{
-              left: pattern.x + 'px',
-              top: pattern.y + 'px',
-              transform: `rotate(${pattern.rotation}deg)`,
-              fontSize: getPatternSize(pattern.patternId) + 'px',
-            }" @mousedown="startDrag(pattern.id, $event)">
-            <div class="pattern-item" v-html="getPatternSvg(pattern.patternId)" :style="{
-              width: pattern.size.width * 2 + 'px',
-              height: pattern.size.height * 2 + 'px',
-            }" />
+            <div v-for="pattern in placedPatterns" :key="pattern.id" class="pattern-on-plate"
+              :class="{ selected: pattern.selected }" :style="{
+                left: pattern.x + 'px',
+                top: pattern.y + 'px',
+                transform: `rotate(${pattern.rotation}deg)`,
+                fontSize: getPatternSize(pattern.patternId) + 'px',
+              }" @mousedown="startDrag(pattern.id, $event)">
+              <div class="pattern-item" v-html="getPatternSvg(pattern.patternId)" :style="{
+                width: pattern.size.width * 2 + 'px',
+                height: pattern.size.height * 2 + 'px',
+              }" />
 
-            <div class="pattern-controls">
-              <!-- <button class="control-btn rotate" @mousedown.stop="startRotate(pattern.id, $event)" @touchstart.stop="startRotate(pattern.id, $event)">
+              <div class="pattern-controls">
+                <!-- <button class="control-btn rotate" @mousedown.stop="startRotate(pattern.id, $event)" @touchstart.stop="startRotate(pattern.id, $event)">
                 <Icon name="ic:baseline-cached" class="text-blue-500" />
               </button> -->
-              <button class="rotate-handle" @mousedown.stop="startRotate(pattern.id, $event)">
-                <Icon name="ic:baseline-cached" class="text-blue-500" />
-              </button>
-              <button class="delete-btn" @click.stop="removePattern(pattern.id)">
-                <Icon name="ic:baseline-close" class="text-red-500" />
-              </button>
+                <button class="rotate-handle" @mousedown.stop="startRotate(pattern.id, $event)">
+                  <Icon name="ic:baseline-cached" class="text-blue-500" />
+                </button>
+                <button class="delete-btn" @click.stop="removePattern(pattern.id)">
+                  <Icon name="ic:baseline-close" class="text-red-500" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -58,85 +62,28 @@
             <i class="i-mdi-eye mr-1"></i>
             預覽設計
           </el-button>
-          <el-button @click="designStore.exportDesign">
+          <!-- <el-button @click="designStore.exportDesign">
             <i class="i-mdi-export mr-1"></i>
             匯出設計
-          </el-button>
+          </el-button> -->
         </div>
       </div>
     </div>
 
-    <!-- 當前選擇資訊 -->
-    <!-- <div v-if="selectedPattern" class="selected-info">
-      <h4>{{ $t("selectedPattern") }}</h4>
-      <div class="pattern-controls">
-        <el-slider v-model="rotationValue" :min="0" :max="360" :step="1" @input="updateSelectedRotation" show-input>
-          <template #prepend>{{ $t("rotation") }}</template>
-</el-slider>
-
-<el-slider v-model="scaleValue" :min="0.1" :max="3" :step="0.1" @input="updateSelectedScale" show-input>
-  <template #prepend>{{ $t("scale") }}</template>
-</el-slider>
-
-<el-button type="danger" @click="deleteSelectedPattern" icon="Delete">
-  {{ $t("deleteSelected") }}
-</el-button>
-</div>
-</div> -->
   </div>
 </template>
 
 <script setup lang="ts">
-// import { computed, ref, watch } from "vue";
-
-// import { useDesignStore } from "~/stores/useDesignStore";
-// import { usePlateDesignerStore } from "~/stores/useDesignStore";
-import DraggableItem from "../ui/DraggableItem.vue";
-// import { Delete, Check } from "@element-plus/icons-vue";
-
-// const store = usePlateDesignerStore();
 const designStore = useDesignStore();
 
 // 計算屬性
 const currentPlate = computed(() => designStore.currentPlate);
-const placedPatterns = computed(() => designStore.placedPatterns);
+const placedPatterns = computed(() => designStore.placedPatterns || []);
 const selectedPattern = computed(() => designStore.selectedPattern);
-// const patterns = computed(() => designStore.patterns);
-
-// const plateSize = computed(() => currentPlate.value?.size || { width: 300, height: 300 });
-
-// const rotationValue = ref(0);
-// const scaleValue = ref(1);
-// const backgroundColor = ref("#FFFFFF");
-
-// 預定義顏色
-// const predefinedColors = [
-//   "#FFFFFF",
-//   "#F5F5DC",
-//   "#FFF8DC",
-//   "#FAEBD7",
-//   "#FFE4C4",
-//   "#DEB887",
-//   "#D2B48C",
-// ];
 
 const clearSelection = () => {
   designStore.patterns.forEach((p) => (p.selected = false));
 };
-
-// 監聽選擇的圖案變化
-// watch(selectedPattern, (newPattern) => {
-//   if (newPattern) {
-//     rotationValue.value = newPattern.rotation;
-//     scaleValue.value = newPattern.scale;
-//   }
-// });
-
-// watch(currentPlate, (newPlate) => {
-//   if (newPlate) {
-//     designStore.selectPlate(newPlate.id);
-//   }
-// });
 
 // 建立圖片元素的 SVG 內容
 const getPatternSvg = (patternId: string) => {
@@ -150,29 +97,22 @@ const getPatternSize = (patternId: string) => {
   return pattern?.defaultSize || 100;
 };
 
-// 選擇盤子上的圖案
-// const selectPatternOnPlate = (patternId: string) => {
-//   designStore.selectPattern(patternId);
-// };
+
 const plateContainerRef = ref<HTMLElement | null>(null);
 // 拖曳相關變數
-// const isDragging = ref(false);
 let isDragging = false;
 let dragTargetId: string | null = null;
 let dragStartX = 0, dragStartY = 0;
 let originalLeft = 0, originalTop = 0;
-// const dragPatternId = ref(null);
-// const dragStart = ref({ x: 0, y: 0 });
-// const patternStart = ref({ x: 0, y: 0 });
 
-// 获取盘子容器尺寸 
+// 取容器尺寸 
 const getContainerRect = () => {
   if (!plateContainerRef.value) return;
   const rect = plateContainerRef.value.getBoundingClientRect();
   return rect;
 };
 
-// 更新图案位置
+// 更新圖案位置
 const updatePatternPosition = (id: any, newLeft: number, newTop: number) => {
   // const pattern = patterns.value.find(p => p.id === id);
   if (!selectedPattern.value) return;
@@ -189,7 +129,7 @@ const updatePatternAngle = (id: any, newAngleDeg: any) => {
   // const pattern = patterns.value.find(p => p.id === id);
   if (!selectedPattern.value) return;
   // 确保角度在 0~360 范围，但不影响体验
-  selectedPattern.value.rotation = ((newAngleDeg % 360) + 360) % 360;
+  selectedPattern.value.rotation = Number(((((newAngleDeg % 360) + 360) % 360).toFixed(2)));
 };
 
 // 获取图案中心点在屏幕上的坐标（相对于浏览器视口）
@@ -223,61 +163,6 @@ const startDrag = (patternId: any, event: any) => {
   event.preventDefault();
 };
 
-// const startDrag = (patternId: any, event: any) => {
-//   designStore.selectPattern(patternId);
-
-//   isDragging.value = true;
-//   dragPatternId.value = patternId;
-//   dragStart.value = { x: event.clientX, y: event.clientY };
-
-//   const pattern = placedPatterns.value.find((p) => p.id === patternId);
-//   if (pattern) {
-//     // patternStart.value = { ...pattern?.position };
-//     patternStart.value = { x: pattern.x, y: pattern.y };
-//     designStore.selectedPattern = pattern;
-//   }
-
-//   // // 添加全局事件監聽器
-//   // document.addEventListener("mousemove", handleDrag);
-//   // document.addEventListener("mouseup", stopDrag);
-// };
-
-// 處理拖曳
-// const handleDrag = (event: any) => {
-//   if (!isDragging.value || !dragPatternId.value) return;
-
-//   const deltaX = event.clientX - dragStart.value.x;
-//   const deltaY = event.clientY - dragStart.value.y;
-
-//   const patternIndex = placedPatterns.value.findIndex(
-//     (p) => p.id === dragPatternId.value
-//   );
-//   if (patternIndex !== -1) {
-//     const newX = patternStart.value.x + deltaX;
-//     const newY = patternStart.value.y + deltaY;
-
-//     // 確保圖案不會超出盤子邊界
-//     const maxX =
-//       plateSize.value.width * 2 -
-//       getPatternSize(placedPatterns.value[patternIndex].patternId);
-//     const maxY =
-//       plateSize.value.height * 2 -
-//       getPatternSize(placedPatterns.value[patternIndex].patternId);
-
-//     placedPatterns.value[patternIndex].x = Math.max(0, Math.min(newX, maxX));
-//     placedPatterns.value[patternIndex].y = Math.max(0, Math.min(newY, maxY));
-//   }
-// };
-
-// 停止拖曳
-// const stopDrag = () => {
-//   isDragging.value = false;
-//   dragPatternId.value = null;
-
-//   // 移除全局事件監聽器
-//   document.removeEventListener("mousemove", handleDrag);
-//   document.removeEventListener("mouseup", stopDrag);
-// };
 
 let rotatingId: string | null = null;
 let startAngleRad = 0;     // 初始鼠标相对于中心点的弧度
@@ -288,9 +173,7 @@ let centerX = 0, centerY = 0; // 图案中心点的屏幕坐标（在旋转开�
 // 旋转开始 (记录鼠标相对于图案中心点的角度)
 const startRotate = (patternId: string, event: any) => {
   designStore.selectPattern(patternId);
-  // event.stopPropagation();
-  // const pattern = patterns.value.find(p => p.id === id);
-  // if (!pattern) return;
+
   if (!selectedPattern.value) return;
   const center = getPatternScreenCenter(selectedPattern.value);
   if (!center) return;
@@ -600,6 +483,12 @@ onUnmounted(() => {
   height: 400px; */
   position: relative;
   margin-bottom: 20px;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.plate-container.flipped {
+  transform: rotateY(180deg);
 }
 
 .plate-background {
@@ -637,6 +526,7 @@ onUnmounted(() => {
   will-change: left, top, transform;
   transition: box-shadow 0.1s;
   transform-origin: center center;
+  /* backface-visibility: hidden; */
 }
 
 .pattern-on-plate.selected {
@@ -661,6 +551,10 @@ onUnmounted(() => {
 
 .pattern-on-plate.selected .pattern-controls {
   opacity: 1;
+}
+
+.pattern-back {
+  transform: rotateY(180deg);
 }
 
 /* .pattern-controls {

@@ -5,133 +5,156 @@
       {{ $t("_designer.design_complete") }}
     </h2>
 
-    <div class="final-preview mt-12" ref="printContainerRef">
-      <div class="preview-container" ref="printContentRef">
-        <div class="preview-plate" :style="{
-          width: currentPlate?.size.width + 'px',
-          height: currentPlate?.size.height + 'px',
-          '-webkit-mask-image': currentPlate?.image ? `url(${currentPlate.image})` : 'none',
-          'mask-image': currentPlate?.image ? `url(${currentPlate.image})` : 'none',
-          '-webkit-mask-repeat': 'no-repeat',
-          'mask-repeat': 'no-repeat',
-          '-webkit-mask-size': 'contain',
-          'mask-size': 'contain',
-          '-webkit-mask-position': 'center',
-          'mask-position': 'center',
-          'position': 'relative',
-          'overflow': 'hidden' /* 保險起見加上 overflow */
-        }">
-          <!-- 2. 真正的碗底圖：放在底層顯示 -->
-          <div class="plate-background-image" :style="{
-            backgroundImage: currentPlate?.image ? `url(${currentPlate.image})` : 'none',
-            backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center',
-            backgroundSize: 'contain',
-            position: 'absolute',
-            inset: 0,
-            zIndex: 0
-          }"></div>
+    <div ref="printContainerRef">
 
-          <!-- 3. 圖案層：現在這些圖案會被父層的 mask-image 裁切 -->
-          <div v-for="pattern in placedPatterns" :key="pattern.id + '-preview'" class="plate-pattern-container" :style="{
-            position: 'absolute',
-            left: pattern.x / 2 + 'px',
-            top: pattern.y / 2 + 'px',
-            transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
-            width: pattern.size.width * 1 + 'px',
-            height: pattern.size.height * 1 + 'px',
-            zIndex: 1
-          }">
-            <div class="plate-pattern" :style="{
-              backgroundImage: `url(${pattern.image})`,
-              backgroundSize: 'contain',
+
+      <div class="final-preview mt-12 p-8">
+        <div class="preview-container flex p-4" ref="printContentRef">
+          <div v-for="(plate, i) in designStore.currentMainPlate?.children">
+
+            <div class="preview-plate" :style="{
+              width: plate.size.width + 'px',
+              height: plate.size.height + 'px',
+              '-webkit-mask-image': plate.image ? `url(${plate.image})` : 'none',
+              'mask-image': plate.image ? `url(${plate.image})` : 'none',
+              '-webkit-mask-repeat': 'no-repeat',
+              'mask-repeat': 'no-repeat',
+              '-webkit-mask-size': 'contain',
+              'mask-size': 'contain',
+              '-webkit-mask-position': 'center',
+              'mask-position': 'center',
+              'position': 'relative',
+              'overflow': 'hidden' /* 保險起見加上 overflow */
+            }">
+              <div class="plate-background-image" :style="{
+                backgroundImage: plate.image ? `url(${plate.image})` : 'none',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                backgroundSize: 'contain',
+                position: 'absolute',
+                inset: 0,
+                zIndex: 0
+              }"></div>
+
+              <div v-for="pattern in designStore.totalPatterns[i]" :key="pattern.id + '-preview'"
+                class="plate-pattern-container" :style="{
+                  position: 'absolute',
+                  left: pattern.x / 2 + 'px',
+                  top: pattern.y / 2 + 'px',
+                  transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
+                  width: pattern.size.width * 1.3 + 'px',
+                  height: pattern.size.height * 1.3 + 'px',
+                  zIndex: 1
+                }">
+                <div class="plate-pattern" :style="{
+                  backgroundImage: `url(${pattern.image})`,
+                  backgroundSize: 'contain',
+                  backgroundRepeat: 'no-repeat',
+                  width: '100%',
+                  height: '100%'
+                }" />
+              </div>
+            </div>
+
+            <!-- <div class="preview-plate" :style="{
+            width: currentPlate?.size.width + 'px',
+            height: currentPlate?.size.height + 'px',
+            '-webkit-mask-image': currentPlate?.image ? `url(${currentPlate.image})` : 'none',
+            'mask-image': currentPlate?.image ? `url(${currentPlate.image})` : 'none',
+            '-webkit-mask-repeat': 'no-repeat',
+            'mask-repeat': 'no-repeat',
+            '-webkit-mask-size': 'contain',
+            'mask-size': 'contain',
+            '-webkit-mask-position': 'center',
+            'mask-position': 'center',
+            'position': 'relative',
+            'overflow': 'hidden' /* 保險起見加上 overflow */
+          }"> -->
+            <!-- 2. 真正的碗底圖：放在底層顯示 -->
+            <!-- <div class="plate-background-image" :style="{
+              backgroundImage: currentPlate?.image ? `url(${currentPlate.image})` : 'none',
               backgroundRepeat: 'no-repeat',
-              width: '100%',
-              height: '100%'
-            }" />
+              backgroundPosition: 'center',
+              backgroundSize: 'contain',
+              position: 'absolute',
+              inset: 0,
+              zIndex: 0
+            }"></div> -->
+
+            <!-- 3. 圖案層：現在這些圖案會被父層的 mask-image 裁切 -->
+            <!-- <div v-for="pattern in placedPatterns" :key="pattern.id + '-preview'" class="plate-pattern-container"
+              :style="{
+                position: 'absolute',
+                left: pattern.x / 2 + 'px',
+                top: pattern.y / 2 + 'px',
+                transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
+                width: pattern.size.width * 1 + 'px',
+                height: pattern.size.height * 1 + 'px',
+                zIndex: 1
+              }">
+              <div class="plate-pattern" :style="{
+                backgroundImage: `url(${pattern.image})`,
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+                width: '100%',
+                height: '100%'
+              }" />
+            </div> -->
+            <!-- </div> -->
           </div>
         </div>
-        <!-- <div class="preview-plate" :style="{
-          background: currentPlate?.image
-            ? `url(${currentPlate.image}) no-repeat center / contain` : 'none',
-          '-webkit-mask-image': currentPlate?.image
-            ? `url(${currentPlate.image}) no-repeat center / contain` : 'none',
-          'mask-image:': currentPlate?.image
-            ? `url(${currentPlate.image}) no-repeat center / contain` : 'none',
-        }" style="
-            padding: 10px 20px;
-          "> -->
-        <!-- 預覽盤子上的圖案 -->
-        <!-- <div v-for="pattern in placedPatterns" :key="pattern.id + '-preview'" class="plate-pattern-container" :style="{
-            width: pattern.size.width * 1.8 + 'px',
-            height: pattern.size.height * 1.8 + 'px',
-            left: pattern.x / 1.4 + 'px',
-            top: pattern.y / 1.4 + 'px',
-            // transform: `rotate(${pattern.rotation}deg)`,
-            transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
-          }">
-            <div class="plate-pattern" :style="{ backgroundImage: `url(${pattern.image})` }"></div>
-          </div> -->
 
-        <!-- <div v-for="pattern in placedPatterns" :key="pattern.id + '-preview'" class="plate-pattern-container" :style="{
-            left: pattern.x / 1.4 + 'px',
-            top: pattern.y / 1.4 + 'px',
-            transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
-            // fontSize: getPatternSize(pattern.patternId) + 'px',
-            width: pattern.size.width * 1.4 + 'px',
-            height: pattern.size.height * 1.4 + 'px',
-          }">
-            <div class="plate-pattern" :style="{
-              backgroundImage: `url(${pattern.image})`,
-              'max-width': pattern.size.width * 2 + 'px',
-              'max-height': pattern.size.height * 2 + 'px',
-            }" />
-          </div> -->
-        <!-- </div> -->
+
       </div>
 
-      <div class="preview-details" ref="printDetailRef">
-        <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
-          <div class="text-sm font-bold text-gray-500 mb-1">盤子樣式</div>
-          <div class="text-lg font-semibold text-gray-800">
-            {{
-              appStore.locale === "zh-TW"
-                ? designStore.currentPlate?.name_zh
-                : designStore.currentPlate?.name_en
-            }}
-            <!-- {{ designStore.currentPlate?.name }} -->
+      <div class="final-preview mt-12">
+        <div class="preview-details" ref="printDetailRef">
+          <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
+            <div class="text-sm font-bold text-gray-500 mb-1">盤子樣式</div>
+            <div class="text-lg font-semibold text-gray-800">
+              {{
+                appStore.locale === "zh-TW"
+                  ? designStore.currentMainPlate?.name_zh
+                  : designStore.currentMainPlate?.name_en
+              }}
+            </div>
           </div>
-        </div>
 
-        <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
-          <div class="text-sm font-bold text-gray-500 mb-1">圖案數量</div>
-          <div class="text-lg font-semibold text-gray-800">
-            {{ designStore.placedPatterns.length }} 個
-          </div>
-          <div v-if="designStore.placedPatterns.length > 0" class="mt-2 space-y-1">
-            <div v-for="pattern in designStore.placedPatterns" :key="pattern.id"
-              class="flex items-center justify-center gap-2 text-sm text-gray-600">
-              <div class="bg-center bg-no-repeat bg-contain"
-                :style="{ backgroundImage: `url(${getImageUrl(pattern.image)})` }"></div>
-              <div class="flex justify-between w-full">
-                <span class="font-bold">{{ pattern.name }} ({{ pattern.size.width }}px)</span>
-                <span class="font-bold">{{ $t("currency") }} {{ pattern.price }} </span>
+          <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
+            <div class="text-sm font-bold text-gray-500 mb-1">圖案數量</div>
+            <div class="text-lg font-semibold text-gray-800">
+              {{ designStore.totalCartPatterns.length }} 個
+            </div>
+            <div v-if="designStore.totalCartPatterns.length > 0" class="mt-2 space-y-1">
+              <div v-for="pattern in designStore.totalCartPatterns" :key="pattern.id"
+                class="flex items-center justify-center gap-2 text-sm text-gray-600">
+                <div class="bg-center bg-no-repeat bg-contain"
+                  :style="{ backgroundImage: `url(${getImageUrl(pattern.image)})` }"></div>
+                <div class="flex justify-between w-full">
+                  <span class="font-bold"> {{
+                    appStore.locale === "zh-TW" ? pattern.name_zh : pattern.name_en }} </span>
+                  <span class="font-bold">{{ $t("currency") }} {{ pattern.price }} </span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between gap-2 mt-4 text-sm font-bold text-gray-800">
+                <span>{{ $t("_designer.total_price") }}:</span>
+                <span class="text-blue-500 text-lg">${{ designStore.designPrice }}</span>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
-          <div class="text-sm font-bold text-gray-500 mb-1">設計時間</div>
-          <div class="text-lg font-semibold text-gray-800">
-            {{ designStore.designTime }}
+          <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
+            <div class="text-sm font-bold text-gray-500 mb-1">設計時間</div>
+            <div class="text-lg font-semibold text-gray-800">
+              {{ designStore.designTime }}
+            </div>
           </div>
-        </div>
 
-        <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
-          <div class="text-sm font-bold text-gray-500 mb-1">設計編號</div>
-          <div class="text-lg font-semibold text-gray-800">
-            {{ designStore.designId }}
+          <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
+            <div class="text-sm font-bold text-gray-500 mb-1">設計編號</div>
+            <div class="text-lg font-semibold text-gray-800">
+              {{ designStore.designId }}
+            </div>
           </div>
         </div>
       </div>
@@ -276,7 +299,7 @@ const downloadImage = async () => {
     // 生成圖片
     // const canvas = await html2canvas(element, {
     const canvas = await html2canvas(printContainerRef.value, {
-      scale: 2, // 2倍解析度
+      scale: 4, // 4倍解析度
       backgroundColor: "#ffffff",
       allowTaint: false,
       useCORS: true,
@@ -303,6 +326,7 @@ const downloadImage = async () => {
 const finishDesign = async () => {
   // ElMessage.success("感謝您的設計！我們將盡快與您聯繫確認訂單細節。");
 
+  console.log(designStore.addToCartPatterns);
   const response = await AddToCart(designStore.addToCartPatterns);
   if (response) {
     window.open(response.link, "_blank");
@@ -310,7 +334,6 @@ const finishDesign = async () => {
   } else {
     ElMessage.error("加入購物車失敗，請稍後重試");
   }
-
 
   designStore.finishDesign();
 };
@@ -669,47 +692,47 @@ const printDesign = async () => {
 };
 
 // const printWindow = window.open('', '_blank')
-const simplePrint = () => {
-  if (!process.client) return;
+// const simplePrint = () => {
+//   if (!process.client) return;
 
-  const printContent = document.querySelector(".final-preview");
-  if (!printContent) return;
+//   const printContent = document.querySelector(".final-preview");
+//   if (!printContent) return;
 
-  const originalTitle = document.title;
-  document.title = `設計列印 - ${designStore.designId}`;
+//   const originalTitle = document.title;
+//   document.title = `設計列印 - ${designStore.designId}`;
 
-  const printWindow = window.open("", "_blank");
-  if (!printWindow) {
-    ElMessage.error("無法打開列印窗口，請允許彈出窗口");
-    return;
-  }
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>列印設計</title>
-        <link rel="stylesheet" href="/assets/index.scss">
-        <style>
-          /* 複製您的主要樣式 */
-          body { padding: 20px; }
-          .final-preview { max-width: 1200px; margin: 0 auto; }
-          @media print {
-            .preview-controls { display: none; }
-          }
-        </style>
-      </head>
-      <body>
-        ${printContent.outerHTML}
-      </body>
-    </html>
-  `);
+//   const printWindow = window.open("", "_blank");
+//   if (!printWindow) {
+//     ElMessage.error("無法打開列印窗口，請允許彈出窗口");
+//     return;
+//   }
+//   printWindow.document.write(`
+//     <html>
+//       <head>
+//         <title>列印設計</title>
+//         <link rel="stylesheet" href="/assets/index.scss">
+//         <style>
+//           /* 複製您的主要樣式 */
+//           body { padding: 20px; }
+//           .final-preview { max-width: 1200px; margin: 0 auto; }
+//           @media print {
+//             .preview-controls { display: none; }
+//           }
+//         </style>
+//       </head>
+//       <body>
+//         ${printContent.outerHTML}
+//       </body>
+//     </html>
+//   `);
 
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
-  printWindow.onafterprint = () => printWindow.close();
+//   printWindow.document.close();
+//   printWindow.focus();
+//   printWindow.print();
+//   printWindow.onafterprint = () => printWindow.close();
 
-  document.title = originalTitle;
-};
+//   document.title = originalTitle;
+// };
 </script>
 
 <style scoped>
@@ -726,13 +749,15 @@ const simplePrint = () => {
   align-items: center;
   gap: 40px;
   flex-wrap: wrap;
+  /* padding: 40px; */
 }
 
 .preview-container {
-  max-width: 500px;
-  max-height: 500px;
+  /* max-width: 500px;
+  max-height: 500px; */
   position: relative;
   overflow: hidden;
+  gap: 40px;
   /* border-radius: 50%;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15); */
 }

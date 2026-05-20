@@ -41,7 +41,8 @@
         "pattern_selector_desc": "使用說明：",
         "pattern_selector_desc_1": "• 點擊圖案添加到盤子上",
         "pattern_control": "圖案控制",
-        "design_complete":"設計完成！"
+        "design_complete":"設計完成！",
+        "total_price": "總金額"
     },
     "patterns": {
         "all": "所有圖案",

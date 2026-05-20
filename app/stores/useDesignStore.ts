@@ -1,25 +1,31 @@
 import { defineStore } from "pinia";
 import { GetImage } from "@/api";
 import type { Plate, PlateDesign, PlateStyle, Pattern, PlacedPattern, DesignState } from "~~/types";
-import { pa } from "element-plus/es/locale/index.mjs";
+// import { pa } from "element-plus/es/locale/index.mjs";
 
 export const useDesignStore = defineStore("design", {
   state: () => ({
     plates: [] as any[],
     currentMainPlate: null as Plate | null,
     currentPlate: null as Plate | null,
+    currentPlateIndex: 0 as number | 0,
+
     nextPatternId: 1,
     showPreview: false,
     designId: "",
     designTime: "",
-    patterns: [] as any[],
-    placedPatterns: [] as PlacedPattern[],
-    selectedPattern: null as PlacedPattern | null,
-    designHistory: [] as PlateDesign[],
-    addToCartPatterns: [] as any[],
 
+    patterns: [] as any[],
+    totalPatterns: [] as any[],
+    placedPatterns: [] as any[],
+    selectedPattern: null as PlacedPattern | null,
+
+    // designHistory: [] as PlateDesign[],
+    addToCartPatterns: [] as any[],
+    totalCartPatterns: [] as any[],
     loading: false,
-    error: null as string | null
+    error: null as string | null,
+    isFlipped: false,
   }),
 
   getters: {
@@ -27,13 +33,12 @@ export const useDesignStore = defineStore("design", {
 
     getPatternById: (state) => (id: string) => state.patterns.find((pattern) => pattern?.id.toString() === id),
 
-    totalPatternsCount: (state) => state.placedPatterns.length,
+    totalPatternsCount: (state) => state.addToCartPatterns.length,
 
     designPrice: (state) => {
-      if (!state.currentPlate) return 0;
-      const basePrice = state.currentPlate.price;
-      const patternPrice = state.placedPatterns.reduce((sum, item) => sum + item.price, 0);
-      // const patternPrice = state.placedPatterns.length * 5; // 每個圖案加5元
+      if (!state.currentMainPlate) return 0;
+      const basePrice = state.currentMainPlate.price;
+      const patternPrice = state.addToCartPatterns ? state.addToCartPatterns.reduce((sum, item) => sum + item.price, 0) : 0;
       return basePrice + patternPrice;
     },
   },
@@ -93,12 +98,14 @@ export const useDesignStore = defineStore("design", {
       }
     },
 
+    // 設定 Plates
     SetPlates(data: any) {
       this.plates = data;
 
       if (this.plates.length > 0 && !this.currentPlate) {
+        this.currentMainPlate = this.plates[0];
         if (this.plates[0].children[0]) {
-          this.currentPlate = this.plates[0].children[0];
+          this.selectPlate(this.plates[0].children[0].id, 0)
         }
       }
     },
@@ -106,42 +113,35 @@ export const useDesignStore = defineStore("design", {
     // Get Patterns
     SetPatterns(data: any) {
       this.patterns = data;
+      // console.log("Patterns set in store:", this.patterns);
     },
-
-    // async finishDesign() {
-    //   const response = await AddToCart();
-    // },
-
-    // async urlToBase64(url: string) {
-    //   const proxyUrl = `/image-proxy/${url.replace("https//img.shoplineapp.com/", "")}`;
-    //   const response = await fetch(url);
-    //   console.log(response);
-    //   // const blob = await response.blob();
-    //   // return new Promise((resolve, reject) => {
-    //   //   const reader = new FileReader();
-    //   //   reader.onloadend = () => resolve(reader.result);
-    //   //   reader.onerror = reject;
-    //   //   reader.readAsDataURL(blob);
-    //   // });
-    // },
+    
     selectMainPlate(plateId: string) {
       const plate = this.getPlateById(plateId);
       if (plate) {
         this.currentMainPlate = plate;
+        this.selectPlate(this.currentMainPlate.children[0].id, 0)
       }
     },
 
-    selectPlate(plateId: string) {
-      // const plate = this.getPlateById(plateId);
-      // const plate = this.plates.find((item) => {
-      //   item.children.some((child: any) => child.id === plateId)
-      // })
+    selectPlate(plateId: string, i: number) {
       if (this.currentMainPlate) {
+        if (i) {
+          this.isFlipped = i % 2 === 1; // 偶數為正面，奇數為反面
+        } else {
+          this.isFlipped = false;
+        }
+
         const plate = this.currentMainPlate?.children.find(child => child.id === plateId) || null;
         if (plate) {
           this.currentPlate = plate;
         }
       }
+      this.currentPlateIndex = i;
+      if (!this.totalPatterns[i]) {
+        this.totalPatterns[i] = [];
+      }
+      this.placedPatterns = this.totalPatterns[i]
     },
 
     selectPattern(id: string) {
@@ -175,16 +175,28 @@ export const useDesignStore = defineStore("design", {
         rotation: 0,
         angle: 0,
         scale: 1,
-        zIndex: this.placedPatterns.length + 1,
+        zIndex: this.addToCartPatterns.length + 1,
         selected: false,
       };
 
-      this.placedPatterns.push(placedPattern);
+      this.totalPatterns[this.currentPlateIndex].push(placedPattern);
 
       this.addToCartPatterns.push({
         id: pattern.parent_id,
         variation_id: pattern.id,
       });
+
+      this.totalCartPatterns.push({
+        id: pattern.parent_id,
+        variation_id: pattern.id,
+        price: pattern.price,
+        name_zh: pattern.name_zh,
+        name_en: pattern.name_en,
+        width: pattern.size.width,
+        height: pattern.size.height,
+      });
+
+
     },
 
     // 圖案移除後，同步更新購物車圖案列表
@@ -199,27 +211,6 @@ export const useDesignStore = defineStore("design", {
       }
     },
 
-    // selectPattern(index: number) {
-    //   // 取消所有其他圖案的選中狀態
-    //   this.patterns.forEach((p) => (p.selected = false));
-
-    //   if (index >= 0 && index < this.patterns.length) {
-    //     this.patterns[index].selected = true;
-    //   }
-    // },
-
-    // removePattern(index: number) {
-    //   if (index >= 0 && index < this.patterns.length) {
-    //     this.patterns.splice(index, 1);
-    //   }
-    // },
-
-    // updatePatternPosition(index: number, x: number, y: number) {
-    //   if (index >= 0 && index < this.patterns.length) {
-    //     this.patterns[index].x = Math.max(0, Math.min(500 - this.patterns[index].width, x));
-    //     this.patterns[index].y = Math.max(0, Math.min(500 - this.patterns[index].height, y));
-    //   }
-    // },
     centerPattern(id: string) {
       const pattern = this.placedPatterns.find((p) => p.id === id);
 
@@ -328,7 +319,7 @@ export const useDesignStore = defineStore("design", {
     },
 
     // 匯出設計為 JSON 檔案
-    exportDesign() {      
+    exportDesign() {
       const designData = {
         plate: this.currentPlate,
         patterns: this.placedPatterns,
@@ -344,7 +335,6 @@ export const useDesignStore = defineStore("design", {
       downloadAnchor.click();
       document.body.removeChild(downloadAnchor);
 
-      // alert(`設計已匯出為 JSON 檔案: plate-design-${this.designId}.json`);
     },
 
     // 列印設計
@@ -438,19 +428,6 @@ export const useDesignStore = defineStore("design", {
       this.showPreview = false;
       this.placedPatterns = [];
     },
-
-    // finishDesign() {
-    //   this.designTime = new Date().toLocaleString("zh-TW", {
-    //     year: "numeric",
-    //     month: "long",
-    //     day: "numeric",
-    //     hour: "2-digit",
-    //     minute: "2-digit",
-    //   });
-
-    //   this.designId = `DES-${Date.now().toString(36).toUpperCase()}`;
-    //   this.showPreview = true;
-    // },
 
     // exportDesign() {
     //   const designData = {

@@ -4,7 +4,7 @@
       <Icon name="material-symbols:circle" class="text-blue-500" />
       <span>{{ $t("_designer.selectPlate") }}</span>
     </h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div v-for="plate in plates" :key="plate.id"
         :class="['plate-card', { active: designStore.currentMainPlate?.id === plate.id }]"
         @click="designStore.selectMainPlate(plate.id)">
@@ -15,7 +15,8 @@
           <h4>{{ appStore.locale === "zh-TW" ? plate.name_zh : plate.name_en }}</h4>
         </div>
         <div class="plate-info text-gray-800">
-          <p>{{ $t("_designer.size") }}: {{ plate.size.width }} × {{ plate.size.height }}mm</p>
+          <!-- <p>{{ $t("_designer.size") }}: {{ plate.size.width }} × {{ plate.size.height }}mm</p> -->
+          <p>{{ $t("_designer.size") }}: {{ plate.size_label }}</p>
           <p>{{ $t("_designer.price") }}: ${{ plate.price }}</p>
         </div>
       </div>
@@ -24,7 +25,7 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
       <div v-for="(child, i) in currentMainPlate?.children" :key="child.id"
         :class="['plate-card', { active: designStore.currentPlate?.id === child.id }]"
-        @click="designStore.selectPlate(child.id)">
+        @click="designStore.selectPlate(child.id, i)">
         <div class="rounded-full mx-auto mb-2 flex items-center justify-center">
           <img :src="child.image" class="w-18 h-18 object-contain" />
         </div>
@@ -58,14 +59,16 @@ const getPlates = async () => {
 
   if (response && response.items) {
     for (const [i, item] of response.items.entries()) {
+      console.log("Processing plate:", item);
       platesData.push({
         id: item.id,
         name_en: item.title_translations.en,
         name_zh: item.title_translations["zh-hant"],
         image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
         type: item.type,
+        size_label: item.feed_variations.size,
         size: { width: 350, height: 350 },
-        price: item.price.dollar || 300,
+        price: item.lowest_price.dollars || 0,
         children: [],
       });
 
@@ -78,12 +81,12 @@ const getPlates = async () => {
             image: variation.media?.images.source.url ? await GetImage(variation.media.images.source.url) : "",
             type: item.type,
             size: { width: 350, height: 350 },
-            price: variation.price.dollar || 300,
+            price: variation.price.dollar || 0,
           });
         }
       }
     }
-    plates.value = platesData; // 直接更新本地 patterns 變數
+    plates.value = platesData; // 直接更新本地 plates 變數
     designStore.SetPlates(platesData);
   }
 };
