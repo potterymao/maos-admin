@@ -22,7 +22,7 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
       <div v-for="(child, i) in currentMainPlate?.children" :key="child.id"
         :class="['plate-card', { active: designStore.currentPlate?.id === child.id }]"
         @click="designStore.selectPlate(child.id, i)">
