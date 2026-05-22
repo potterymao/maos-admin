@@ -1,12 +1,12 @@
 <template>
   <div class="preview-section mt-28 pt-6 border-t border-gray-200">
-    <h2 class="preview-title flex items-center justify-center gap-4 my-20 text-4xl md:text-5xl">
+    <h2 class="preview-title flex items-center justify-center gap-4 mt-20 mb-10 text-4xl md:text-5xl">
       <Icon name="material-symbols:check-circle-rounded" class="text-3xl" />
       {{ $t("_designer.design_complete") }}
     </h2>
 
     <div ref="printContainerRef">
-      <div class="final-preview mt-20 py-12 font-mono">
+      <div class="final-preview mt-20 py-8 font-mono">
         <div class="preview-container flex flex-wrap p-2" ref="printContentRef">
           <div v-for="(plate, i) in designStore.currentMainPlate?.children">
             <div class="preview-plate" :style="{
