@@ -6,7 +6,7 @@
     </h2>
 
     <div ref="printContainerRef">
-      <div class="final-preview mt-20 py-12">
+      <div class="final-preview mt-20 py-12 font-mono">
         <div class="preview-container flex flex-wrap p-2" ref="printContentRef">
           <div v-for="(plate, i) in designStore.currentMainPlate?.children">
             <div class="preview-plate" :style="{
