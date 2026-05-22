@@ -113,16 +113,16 @@
     </div>
 
     <div class="preview-controls">
-      <el-button @click="downloadImage">
-        <Icon name="material-symbols:download-rounded" class="text-[20px] mr-1" />
+      <el-button @click="downloadImage" type="success" class="text-xl">
+        <Icon name="material-symbols:download-rounded" class="text-xl mr-1" />
         下載圖片
       </el-button>
-      <el-button @click="printDesign">
-        <Icon name="material-symbols:print-rounded" class="text-[20px] mr-1" />
+      <el-button @click="printDesign" class="text-xl">
+        <Icon name="material-symbols:print-rounded" class="text-xl mr-1" />
         列印設計
       </el-button>
-      <el-button @click="finishDesign">
-        <Icon name="material-symbols:shopping-cart-outline" class="text-[20px] mr-1" />
+      <el-button @click="finishDesign" type="primary" class="text-xl">
+        <Icon name="material-symbols:shopping-cart-outline" class="text-xl mr-1" />
         加到購物車
       </el-button>
     </div>
