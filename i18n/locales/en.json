@@ -1,9 +1,13 @@
 {
+    "currency": "NT$",
+
     "app": {
         "title": "Plate Designer",
         "description": "Design your custom plate"
     },
-    "designer": {
+    "_designer": {
+        "designer_title": "Decal Designer",
+        "designer_title_desc": "Select a plate and add patterns to create your unique design.",
         "selectPlate": "Select Plate",
         "addPattern": "Add Pattern",
         "preview": "Preview",
