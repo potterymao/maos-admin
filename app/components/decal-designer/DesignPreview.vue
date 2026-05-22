@@ -1,17 +1,14 @@
 <template>
-  <div class="preview-section mt-12 pt-6 border-t border-gray-200">
-    <h2 class="preview-title flex items-center justify-center gap-4 mt-12">
-      <Icon name="material-symbols:check-circle-rounded" class="text-[32px]" />
+  <div class="preview-section mt-28 pt-6 border-t border-gray-200">
+    <h2 class="preview-title flex items-center justify-center gap-4 my-20 text-4xl md:text-5xl">
+      <Icon name="material-symbols:check-circle-rounded" class="text-3xl" />
       {{ $t("_designer.design_complete") }}
     </h2>
 
     <div ref="printContainerRef">
-
-
-      <div class="final-preview mt-12 p-8">
-        <div class="preview-container flex p-4" ref="printContentRef">
+      <div class="final-preview mt-20 py-12">
+        <div class="preview-container flex flex-wrap p-2" ref="printContentRef">
           <div v-for="(plate, i) in designStore.currentMainPlate?.children">
-
             <div class="preview-plate" :style="{
               width: plate.size.width + 'px',
               height: plate.size.height + 'px',
@@ -56,59 +53,14 @@
               </div>
             </div>
 
-            <!-- <div class="preview-plate" :style="{
-            width: currentPlate?.size.width + 'px',
-            height: currentPlate?.size.height + 'px',
-            '-webkit-mask-image': currentPlate?.image ? `url(${currentPlate.image})` : 'none',
-            'mask-image': currentPlate?.image ? `url(${currentPlate.image})` : 'none',
-            '-webkit-mask-repeat': 'no-repeat',
-            'mask-repeat': 'no-repeat',
-            '-webkit-mask-size': 'contain',
-            'mask-size': 'contain',
-            '-webkit-mask-position': 'center',
-            'mask-position': 'center',
-            'position': 'relative',
-            'overflow': 'hidden' /* 保險起見加上 overflow */
-          }"> -->
-            <!-- 2. 真正的碗底圖：放在底層顯示 -->
-            <!-- <div class="plate-background-image" :style="{
-              backgroundImage: currentPlate?.image ? `url(${currentPlate.image})` : 'none',
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'center',
-              backgroundSize: 'contain',
-              position: 'absolute',
-              inset: 0,
-              zIndex: 0
-            }"></div> -->
-
-            <!-- 3. 圖案層：現在這些圖案會被父層的 mask-image 裁切 -->
-            <!-- <div v-for="pattern in placedPatterns" :key="pattern.id + '-preview'" class="plate-pattern-container"
-              :style="{
-                position: 'absolute',
-                left: pattern.x / 2 + 'px',
-                top: pattern.y / 2 + 'px',
-                transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
-                width: pattern.size.width * 1 + 'px',
-                height: pattern.size.height * 1 + 'px',
-                zIndex: 1
-              }">
-              <div class="plate-pattern" :style="{
-                backgroundImage: `url(${pattern.image})`,
-                backgroundSize: 'contain',
-                backgroundRepeat: 'no-repeat',
-                width: '100%',
-                height: '100%'
-              }" />
-            </div> -->
-            <!-- </div> -->
           </div>
         </div>
 
 
-      </div>
+        <!-- </div>
 
-      <div class="final-preview mt-12">
-        <div class="preview-details" ref="printDetailRef">
+      <div class="final-preview"> -->
+        <div class="preview-details mt-2" ref="printDetailRef">
           <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
             <div class="text-sm font-bold text-gray-500 mb-1">盤子樣式</div>
             <div class="text-lg font-semibold text-gray-800">
@@ -138,7 +90,7 @@
               </div>
               <div class="flex items-center justify-between gap-2 mt-4 text-sm font-bold text-gray-800">
                 <span>{{ $t("_designer.total_price") }}:</span>
-                <span class="text-blue-500 text-lg">${{ designStore.designPrice }}</span>
+                <span class="text-lg">${{ designStore.designPrice }}</span>
               </div>
             </div>
           </div>
@@ -401,7 +353,7 @@ const printDesign = async () => {
     const rect = printContent.getBoundingClientRect();
 
     const canvas = await html2canvas(printContent, {
-      scale: 2, // 提高解析度
+      scale: 3, // 提高解析度
       // backgroundColor: null, // 保留透明背景
       allowTaint: false,
       useCORS: true, // 允許跨域圖片
@@ -740,9 +692,9 @@ const printDesign = async () => {
 <style scoped>
 .preview-title {
   text-align: center;
-  font-size: 2.2rem;
+  /* font-size: 2.8rem; */
   color: #2c3e50;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
 }
 
 .final-preview {
@@ -751,14 +703,16 @@ const printDesign = async () => {
   align-items: center;
   gap: 40px;
   flex-wrap: wrap;
+  max-width: 800px;
+  margin: 0 auto;
   /* padding: 40px; */
 }
 
 .preview-container {
-  /* max-width: 500px;
-  max-height: 500px; */
+  max-width: 400px;
+  /* max-height: 500px; */
   position: relative;
-  overflow: hidden;
+  /* overflow: hidden; */
   gap: 40px;
   /* border-radius: 50%;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15); */
@@ -812,7 +766,7 @@ const printDesign = async () => {
 
   .preview-container {
     width: 400px;
-    height: 400px;
+    /* height: 400px; */
   }
 }
 

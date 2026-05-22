@@ -28,6 +28,7 @@ body {
   font-family:
     // "Source Han Serif",
     // "Noto Serif TC",
+    "CustomFont",
     "Inter",
     -apple-system,
     BlinkMacSystemFont,
@@ -37,3 +38,20 @@ body {
   background-color: #f5f5f5;
   color: #333;
 }
+
+@font-face {
+  font-family: "CustomFont";
+  src: url("/fonts/customFont.woff2") format("woff2");
+  // url("/fonts/customFont-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap; /* 讓字體還沒載入完成時先顯示系統預設字體，提升 UX */
+}
+
+// @font-face {
+//   font-family: "CustomFont";
+//   src: url("/fonts/customFont-Bold.woff2") format("woff2");
+//   font-weight: 700;
+//   font-style: normal;
+//   font-display: swap;
+// }

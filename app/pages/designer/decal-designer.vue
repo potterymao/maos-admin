@@ -2,11 +2,11 @@
   <div class="container  mx-auto p-8 space-y-6">
     <!-- 標題 -->
     <header class="text-center mb-4">
-      <h1 class="text-3xl font-bold md:text-4xl text-gray-800 mb-2">
-        <i class="i-mdi-palette text-blue-500 mr-2"></i>
+      <h1 class="text-3xl md:text-5xl  m-2">
+        <!-- <i class="i-mdi-palette mr-2"></i> -->
         盤子設計器
       </h1>
-      <p class="text-gray-600">選擇盤子並添加圖案來設計您的專屬盤子！</p>
+      <p class="text-xl text-gray-600 ">選擇盤子並添加圖案來設計您的專屬盤子！</p>
     </header>
   </div>
 
