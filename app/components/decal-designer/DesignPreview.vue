@@ -123,13 +123,13 @@
           <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
             <div class="text-sm font-bold text-gray-500 mb-1">圖案數量</div>
             <div class="text-lg font-semibold text-gray-800">
-              {{ designStore.totalCartPatterns.length }} 個
+              {{ totalCartPatterns.length }} 個
             </div>
-            <div v-if="designStore.totalCartPatterns.length > 0" class="mt-2 space-y-1">
-              <div v-for="pattern in designStore.totalCartPatterns" :key="pattern.id"
+            <div class="mt-2 space-y-1">
+              <div v-for="pattern in totalCartPatterns" :key="pattern.id"
                 class="flex items-center justify-center gap-2 text-sm text-gray-600">
-                <div class="bg-center bg-no-repeat bg-contain"
-                  :style="{ backgroundImage: `url(${getImageUrl(pattern.image)})` }"></div>
+                <!-- <div class="bg-center bg-no-repeat bg-contain"
+                  :style="{ backgroundImage: `url(${pattern.image})` }"></div> -->
                 <div class="flex justify-between w-full">
                   <span class="font-bold"> {{
                     appStore.locale === "zh-TW" ? pattern.name_zh : pattern.name_en }} </span>
@@ -161,11 +161,6 @@
     </div>
 
     <div class="preview-controls">
-      <!-- <button class="btn btn-primary" @click="shareDesign"><i class="fas fa-share-alt"></i> 分享設計</button> -->
-      <!-- <el-button @click="designStore.exportDesign">
-        <Icon name="material-symbols:download-rounded" class="text-[20px] mr-1" />
-        下載圖片
-      </el-button> -->
       <el-button @click="downloadImage">
         <Icon name="material-symbols:download-rounded" class="text-[20px] mr-1" />
         下載圖片
@@ -190,8 +185,9 @@ import { AddToCart } from "@/api";
 const appStore = useAppStore();
 const designStore = useDesignStore();
 
-const currentPlate = computed(() => designStore.currentPlate);
-const placedPatterns = computed(() => designStore.placedPatterns);
+const totalCartPatterns = computed(() => designStore.totalCartPatterns);
+// const currentPlate = computed(() => designStore.currentPlate);
+// const placedPatterns = computed(() => designStore.placedPatterns);
 
 const getImageUrl = (imagePath: string) => {
   if (process.client) {
@@ -211,10 +207,10 @@ const getImageUrl = (imagePath: string) => {
 // getPatterns();
 
 // 計算圖案尺寸
-const getPatternSize = (patternId: string) => {
-  const pattern = designStore.getPatternById(patternId);
-  return pattern?.defaultSize || 50;
-};
+// const getPatternSize = (patternId: string) => {
+//   const pattern = designStore.getPatternById(patternId);
+//   return pattern?.defaultSize || 50;
+// };
 
 // const shareDesign = () => {
 //   const designSummary = `我設計了一個盤子！\n盤子樣式: ${designStore.currentPlate.name}\n圖案數量: ${designStore.placedPatterns.length}\n設計編號: ${designStore.designId}`;
@@ -310,8 +306,8 @@ const downloadImage = async () => {
 
     // 下載圖片
     const link = document.createElement("a");
-    link.download = `design-${designStore.designId || Date.now()}.png`;
-    link.href = canvas.toDataURL("image/png");
+    link.download = `design-${designStore.designId || Date.now()}.jpg`;
+    link.href = canvas.toDataURL("image/jpeg");
     link.click();
 
     ElMessage.success("圖片下載成功！");
@@ -326,12 +322,13 @@ const downloadImage = async () => {
 const finishDesign = async () => {
   // ElMessage.success("感謝您的設計！我們將盡快與您聯繫確認訂單細節。");
 
-  // console.log(designStore.addToCartPatterns);
+  // 最後加入器型到購物車列表
   designStore.addToCart.push({
     id: designStore.currentMainPlate?.id,
     variation_id: designStore.currentMainPlate?.children[0]?.id,
   })
 
+  console.log("Final cart items:", designStore.addToCart);
   const response = await AddToCart(designStore.addToCart);
   if (response) {
     window.open(response.link, "_blank");
@@ -452,9 +449,9 @@ const printDesign = async () => {
       // },
     });
 
-    const design_image = canvas.toDataURL("image/png");
+    const design_image = canvas.toDataURL("image/jpg");
 
-    const design_detail = canvas_detail.toDataURL("image/png");
+    const design_detail = canvas_detail.toDataURL("image/jpg");
 
     const printWindow = window.open("", "_blank");
     if (!printWindow) {

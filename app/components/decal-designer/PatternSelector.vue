@@ -14,11 +14,9 @@
         <div class="pattern-img">
           <img :src="pattern.image" :alt="pattern.name" class="w-full h-full object-contain" />
         </div>
-        <!-- <img :src="pattern.image" :alt="pattern.name" class="pattern-img" /> -->
-        <div class="pattern-info">
+        <!-- <div class="pattern-info">
           <span class="pattern-name">{{ appStore.locale === "zh-TW" ? pattern.name_zh : pattern.name_en }}</span>
-          <!-- <el-tag size="small">{{ $t(pattern.category) }}</el-tag> -->
-        </div>
+        </div> -->
       </div>
     </div>
 

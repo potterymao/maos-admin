@@ -187,7 +187,8 @@ export const useDesignStore = defineStore("design", {
       });
 
       this.totalCartPatterns.push({
-        id: pattern.parent_id,
+        id: placedPattern.id,
+        patternId: pattern.id,
         variation_id: pattern.id,
         price: pattern.price,
         name_zh: pattern.name_zh,
@@ -201,13 +202,19 @@ export const useDesignStore = defineStore("design", {
 
     // 圖案移除後，同步更新購物車圖案列表
     removePattern(id: string) {
-      const index = this.placedPatterns.findIndex((p) => p.id === id);
+      let index = this.placedPatterns.findIndex((p) => p.id === id);
       if (index !== -1) {
         this.placedPatterns.splice(index, 1);
-        this.addToCartPatterns.splice(index, 1);
-        if (this.selectedPattern?.id === id) {
-          this.selectedPattern = null;
-        }
+      }
+
+      let parent_id = this.placedPatterns.find((p) => p.id === id)?.parentId;
+
+      if ( this.addToCart.findIndex((p) => p.id === parent_id) !== -1) {
+        this.addToCart.splice(index, 1);
+      }
+
+      if ( this.totalCartPatterns.findIndex((p) => p.id === id) !== -1) {
+        this.totalCartPatterns.splice(index, 1);
       }
     },
 
