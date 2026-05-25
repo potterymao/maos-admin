@@ -32,7 +32,7 @@
                 top: pattern.y + 'px',
                 transform: `rotate(${pattern.rotation}deg)`,
                 fontSize: getPatternSize(pattern.patternId) + 'px',
-              }" @mousedown="startDrag(pattern.id, $event)">
+              }" @mousedown="startDrag(pattern.id, $event)" @touchstart.stop="startDrag(pattern.id, $event)">
               <div class="pattern-item" v-html="getPatternSvg(pattern.patternId)" :style="{
                 width: pattern.size.width * 2 + 'px',
                 height: pattern.size.height * 2 + 'px',
@@ -42,7 +42,7 @@
                 <!-- <button class="control-btn rotate" @mousedown.stop="startRotate(pattern.id, $event)" @touchstart.stop="startRotate(pattern.id, $event)">
                 <Icon name="ic:baseline-cached" class="text-blue-500" />
               </button> -->
-                <button class="rotate-handle" @mousedown.stop="startRotate(pattern.id, $event)">
+                <button class="rotate-handle" @mousedown.stop="startRotate(pattern.id, $event)" @touchstart.stop="startRotate(pattern.id, $event)">
                   <Icon name="ic:baseline-cached" class="text-blue-500" />
                 </button>
                 <button class="delete-btn" @click.stop="removePattern(pattern.id)">
@@ -105,6 +105,14 @@ let dragTargetId: string | null = null;
 let dragStartX = 0, dragStartY = 0;
 let originalLeft = 0, originalTop = 0;
 
+// 取得事件坐標的輔助函式（相容滑鼠與平板觸控）
+const getEventClientXY = (e: any) => {
+  if (e.touches && e.touches.length > 0) {
+    return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+  }
+  return { clientX: e.clientX, clientY: e.clientY };
+};
+
 // 取容器尺寸 
 const getContainerRect = () => {
   if (!plateContainerRef.value) return;
@@ -148,19 +156,22 @@ const getPatternScreenCenter = (pattern: any) => {
 // 開始拖曳圖案
 const startDrag = (patternId: any, event: any) => {
   designStore.selectPattern(patternId);
-  // event.stopPropagation();
-  // const pattern = patterns.value.find(p => p.id === id);
-  // if (!pattern) return;
   if (!selectedPattern.value) return;
+
   if (event.target.classList && (event.target.classList.contains('delete-btn') || event.target.classList.contains('rotate-handle'))) return;
+
+  const { clientX, clientY } = getEventClientXY(event);
+
   dragTargetId = patternId;
-  dragStartX = event.clientX;
-  dragStartY = event.clientY;
+  dragStartX = clientX;
+  dragStartY = clientY;
   originalLeft = selectedPattern.value.x;
   originalTop = selectedPattern.value.y;
   isDragging = true;
   document.body.style.cursor = 'grabbing';
-  event.preventDefault();
+  
+  // 阻止預設行為（例如平板上拖曳會導致整個網頁被拉動滾動）
+  if (event.cancelable) event.preventDefault();
 };
 
 
@@ -178,18 +189,25 @@ const startRotate = (patternId: string, event: any) => {
   const center = getPatternScreenCenter(selectedPattern.value);
   if (!center) return;
 
-  const dx = event.clientX - center.x;
-  const dy = event.clientY - center.y;
+  const { clientX, clientY } = getEventClientXY(event);
+
+  const dx = clientX - center.x;
+  const dy = clientY - center.y;
   let angleRad = Math.atan2(dy, dx);  // 范围 -PI 到 PI
 
   rotatingId = patternId;
   startAngleRad = angleRad;
-  initialPatternAngle = selectedPattern.value.angle;
+
+  // initialPatternAngle = selectedPattern.value.angle;
+  // 修正：原代碼中為 .angle，應改為 .rotation 對應你的資料結構
+  initialPatternAngle = selectedPattern.value.rotation || 0;
+
   isRotating = true;
   centerX = center.x;
   centerY = center.y;
   document.body.style.cursor = 'grabbing';
-  event.preventDefault();
+
+  if (event.cancelable) event.preventDefault();
 };
 
 
@@ -382,17 +400,34 @@ let lastAngle = 0;
 
 // 全局事件處理
 const onGlobalMouseMove = (e: any) => {
+  // // 【關鍵修正】只有當使用者真的在「拖曳」或「旋轉」圖案時，才阻止網頁捲動
+  // if (isDragging || isRotating) {
+  //   if (e.cancelable) {
+  //     e.preventDefault(); 
+  //   }
+  // } else {
+  //   // 如果只是普通的手指在滑網頁，直接放行，不干涉
+  //   return;
+  // }
+
+  // 如果是觸控事件，且正在操作，防止平板視窗滾動
+  if ((isDragging || isRotating) && e.cancelable) {
+    e.preventDefault();
+  }
+
+  const { clientX, clientY } = getEventClientXY(e);
+
   if (isDragging && selectedPattern.value && selectedPattern.value.id !== null) {
-    const dx = e.clientX - dragStartX;
-    const dy = e.clientY - dragStartY;
+    const dx = clientX - dragStartX;
+    const dy = clientY - dragStartY;
     const newLeft = originalLeft + dx;
     const newTop = originalTop + dy;
     updatePatternPosition(dragTargetId, newLeft, newTop);
   }
   else if (isRotating && rotatingId !== null) {
     // 计算当前鼠标相对于原图案中心的角度
-    const dx = e.clientX - centerX;
-    const dy = e.clientY - centerY;
+    const dx = clientX - centerX;
+    const dy = clientY - centerY;
     let currentAngleRad = Math.atan2(dy, dx);
     // 角度差（弧度）
     let deltaRad = currentAngleRad - startAngleRad;
@@ -431,12 +466,22 @@ const handleWindowResize = () => {
 onMounted(() => {
   window.addEventListener('mousemove', onGlobalMouseMove);
   window.addEventListener('mouseup', onGlobalMouseUp);
+
+  // 平板觸控監聽
+  window.addEventListener('touchmove', onGlobalMouseMove, { passive: false });
+  window.addEventListener('touchend', onGlobalMouseUp);
+  window.addEventListener('touchcancel', onGlobalMouseUp); // 防止手指劃出螢幕邊緣斷開
+
   window.addEventListener('resize', handleWindowResize);
 });
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', onGlobalMouseMove);
   window.removeEventListener('mouseup', onGlobalMouseUp);
+
+  window.removeEventListener('touchmove', onGlobalMouseMove);
+  window.removeEventListener('touchend', onGlobalMouseUp);
+  window.removeEventListener('touchcancel', onGlobalMouseUp);
   window.removeEventListener('resize', handleWindowResize);
 });
 </script>

@@ -203,11 +203,11 @@ export const useDesignStore = defineStore("design", {
     // 圖案移除後，同步更新購物車圖案列表
     removePattern(id: string) {
       let index = this.placedPatterns.findIndex((p) => p.id === id);
+      let parent_id = this.placedPatterns.find((p) => p.id === id)?.parentId;
+      
       if (index !== -1) {
         this.placedPatterns.splice(index, 1);
-      }
-
-      let parent_id = this.placedPatterns.find((p) => p.id === id)?.parentId;
+      }      
 
       if ( this.addToCart.findIndex((p) => p.id === parent_id) !== -1) {
         this.addToCart.splice(index, 1);

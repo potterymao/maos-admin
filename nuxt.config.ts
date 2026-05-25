@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 /// <reference types="@nuxtjs/i18n" />
+/// <reference types="@vite-pwa/nuxt" />
 
 export default defineNuxtConfig({
   // compatibilityDate: "2025-07-15",
@@ -8,7 +9,7 @@ export default defineNuxtConfig({
   // SSR (SEO)
   ssr: true, // 关闭服务器端渲染，启用客户端渲染
 
-  // devtools: { enabled: true },
+  devtools: { enabled: false },
 
   // devServer: {
   //   host: "0.0.0.0",
@@ -37,7 +38,7 @@ export default defineNuxtConfig({
     },
   ],
 
-  modules: ["@nuxt/devtools", "@nuxt/ui", "@element-plus/nuxt", "@pinia/nuxt", "@nuxtjs/i18n", "dayjs-nuxt", "nuxt-svgo"],
+  modules: ["@nuxt/devtools", "@nuxt/ui", "@element-plus/nuxt", "@pinia/nuxt", "@nuxtjs/i18n", "dayjs-nuxt", "nuxt-svgo", "@vite-pwa/nuxt"],
 
   css: ["element-plus/dist/index.css", "~/assets/index.scss", "~/assets/css/main.css"],
 
@@ -77,32 +78,72 @@ export default defineNuxtConfig({
   // 應用設定
   app: {
     head: {
-      title: "客製化盤子設計器 | Plate Designer",
+      title: "客製化貼花設計器 | Plate Designer",
       meta: [
         { charset: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
         {
           name: "description",
-          content: "線上客製化盤子設計工具，自由選擇盤子樣式、添加圖案，創造獨一無二的盤子設計",
+          content: "線上客製化貼花設計工具，自由選擇貼花樣式、添加圖案，創造獨一無二的貼花設計",
         },
-        { name: "keywords", content: "盤子設計,客製化,DIY,圖案設計,餐具設計" },
+        { name: "keywords", content: "貼花設計,客製化,DIY,圖案設計,餐具設計" },
         { name: "author", content: "Plate Designer" },
         // Open Graph
-        { property: "og:title", content: "客製化盤子設計器" },
-        { property: "og:description", content: "線上客製化盤子設計工具" },
+        { property: "og:title", content: "客製化貼花設計器" },
+        { property: "og:description", content: "線上客製化貼花設計工具" },
         { property: "og:type", content: "website" },
         { property: "og:url", content: "https://plate-designer.com" },
         { property: "og:image", content: "/og-image.jpg" },
         // Twitter Card
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: "客製化盤子設計器" },
-        { name: "twitter:description", content: "線上客製化盤子設計工具" },
+        { name: "twitter:title", content: "客製化貼花設計器" },
+        { name: "twitter:description", content: "線上客製化貼花設計工具" },
       ],
       link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
     },
     // baseURL: process.env.NODE_ENV === "production" ? "/maos-admin/" : "/",
     // baseURL: "/maos-admin/",
     buildAssetsDir: "/static/",
+  },
+
+  // --- PWA 核心設定區塊 ---
+  pwa: {
+    registerType: "autoUpdate", // 當有新版本部署時，自動更新 Service Worker 檔案
+    manifest: {
+      name: "客製化貼花設計器 | Plate Designer",
+      short_name: "貼花設計器",
+      description: "線上客製化貼花設計工具，自由選擇貼花樣式、添加圖案，創造獨一無二的貼花設計",
+      theme_color: "#ffffff",
+      background_color: "#ffffff",
+      display: "standalone", // 重要：平板安裝後會隱藏瀏覽器網址列，像原生應用程式一樣全螢幕運作
+      start_url: "/",
+      icons: [
+        {
+          src: "pwa-192x192.png",
+          sizes: "192x192",
+          type: "image/png"
+        },
+        {
+          src: "pwa-512x512.png",
+          sizes: "512x512",
+          type: "image/png"
+        },
+        {
+          src: "pwa-512x512.png",
+          sizes: "512x512",
+          type: "image/png",
+          purpose: "any maskable" // 確保在部分 Android 平板上圖示不會被強制切成奇怪的形狀
+        }
+      ]
+    },
+    workbox: {
+      navigateFallback: "/",
+      // 確保設計器專用的圖檔（如 .svg, .png）也能加入離線快取快取
+      globPatterns: ["**/*.{js,css,html,png,svg,ico}"]
+    },
+    devOptions: {
+      enabled: true // 開發環境 (npm run dev) 也啟動 PWA 方便你在本地端用平板測試
+    }
   },
 
   nitro: {
