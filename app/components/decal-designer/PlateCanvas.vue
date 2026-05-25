@@ -34,8 +34,8 @@
                 fontSize: getPatternSize(pattern.patternId) + 'px',
               }" @mousedown="startDrag(pattern.id, $event)" @touchstart.stop="startDrag(pattern.id, $event)">
               <div class="pattern-item" v-html="getPatternSvg(pattern.patternId)" :style="{
-                width: pattern.size.width * 2 + 'px',
-                // height: pattern.size.height * 2 + 'px',
+                'width': pattern.size.width * 2 + 'px',
+                // 'height': pattern.size.height * 2 + 'px',
               }" />
 
               <div class="pattern-controls">

@@ -82,6 +82,9 @@ const getPatterns = async () => {
     for (const item of response.items) {
       if (item.variations && item.variations.length > 0) {
         for (const [i, variation] of item.variations.entries()) {
+          let w = variation.feed_variations.size.split("x")[0] || 50;
+          let h = variation.feed_variations.size.split("x")[1] || 50
+          h = h.split("mm")[0];
           patternsData.push({
             id: variation.id,
             parent_id: item.id,
@@ -91,9 +94,10 @@ const getPatterns = async () => {
             price: variation.price.dollars || 0,
             price_label: variation.price.label,
             tags: item.tags || [],
-            // type: item.type,
-            // category: item.category_id,
-            size: { width: 50, height: 50 },
+            size: {
+              width: w,
+              height: h
+            },
             defaultSize: null,
           })
         }
