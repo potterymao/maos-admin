@@ -54,24 +54,12 @@ const designStore = useDesignStore();
 //   await useFetchPatterns();
 // });
 
-// designStore.loadPatterns();
-// useFetchPatterns();
-
-// watch(
-//   () => designStore.patterns,
-//   (newPatterns) => {
-//     // console.log("Patterns updated in store:", newPatterns);
-//     patterns.value = newPatterns;
-//   },
-//   { deep: true }
-// );
 
 // 分類選項
 const categories = ref<SelectMenuItem[]>([
   { key: "all", label: $t("patterns.all") },
-  { key: "flowers", label: $t("patterns.flowers") },
-  { key: "animal", label: $t("patterns.animals") },
-  { key: "geometric", label: $t("patterns.geometrics") },
+  { key: "pets", label: $t("patterns.pets") },
+  { key: "alphabet", label: $t("patterns.alphabet") }
 ]);
 const activeCategory = ref("all");
 
@@ -102,7 +90,8 @@ const getPatterns = async () => {
             image: variation.media?.images.source.url ? await GetImage(variation.media.images.source.url) : "",
             price: variation.price.dollars || 0,
             price_label: variation.price.label,
-            type: item.type,
+            tags: item.tags || [],
+            // type: item.type,
             // category: item.category_id,
             size: { width: 50, height: 50 },
             defaultSize: null,
@@ -111,7 +100,8 @@ const getPatterns = async () => {
       }
     }
     patterns.value = patternsData; // 直接更新本地 patterns 變數
-    designStore.SetPatterns(patternsData);
+    // designStore.SetPatterns(patternsData);
+    console.log("Fetched patterns: 2");
   }
 };
 // getPatterns();
@@ -123,11 +113,9 @@ initData();
 const filteredPatterns = computed(() => {
   let filtered = patterns.value || [];
 
-  // console.log("All patterns:", filtered);
-
   // 分類過濾
   if (activeCategory.value !== "all") {
-    filtered = filtered.filter((pattern: any) => pattern.category === activeCategory.value);
+    filtered = filtered.filter((pattern: any) => pattern.tags.find((tag: any) => tag === activeCategory.value));
   }
 
   return filtered;

@@ -30,11 +30,8 @@
     },
     "patterns": {
         "all": "All Patterns",
-        "animals": "Animals",
-        "flowers": "Flowers",
-        "geometrics": "Geometric",
-        "text": "Text",
-        "custom": "Custom"
+        "pets": "Pets",
+        "alphabet": "Alphabet"
     },
     "plates": {
         "round": "Round Plate",

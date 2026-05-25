@@ -59,7 +59,7 @@ const getPlates = async () => {
 
   if (response && response.items) {
     for (const [i, item] of response.items.entries()) {
-      console.log("Processing plate:", item);
+      // console.log("Processing plate:", item);
       platesData.push({
         id: item.id,
         name_en: item.title_translations.en,

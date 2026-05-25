@@ -48,11 +48,8 @@
     },
     "patterns": {
         "all": "所有圖案",
-        "animals": "動物",
-        "flowers": "花卉",
-        "geometrics": "幾何圖形",
-        "text": "文字",
-        "custom": "自訂"
+        "pets": "寵物系列",
+        "alphabet": "字母系列"
     },
     "plates": {
         "round": "圓形盤",

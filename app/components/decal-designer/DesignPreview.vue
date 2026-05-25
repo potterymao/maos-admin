@@ -280,7 +280,7 @@ const finishDesign = async () => {
     variation_id: designStore.currentMainPlate?.children[0]?.id,
   })
 
-  console.log("Final cart items:", designStore.addToCart);
+  // console.log("Final cart items:", designStore.addToCart);
   const response = await AddToCart(designStore.addToCart);
   if (response) {
     window.open(response.link, "_blank");
