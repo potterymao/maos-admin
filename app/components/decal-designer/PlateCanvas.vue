@@ -35,13 +35,10 @@
               }" @mousedown="startDrag(pattern.id, $event)" @touchstart.stop="startDrag(pattern.id, $event)">
               <div class="pattern-item" v-html="getPatternSvg(pattern.patternId)" :style="{
                 width: pattern.size.width * 2 + 'px',
-                height: pattern.size.height * 2 + 'px',
+                // height: pattern.size.height * 2 + 'px',
               }" />
 
               <div class="pattern-controls">
-                <!-- <button class="control-btn rotate" @mousedown.stop="startRotate(pattern.id, $event)" @touchstart.stop="startRotate(pattern.id, $event)">
-                <Icon name="ic:baseline-cached" class="text-blue-500" />
-              </button> -->
                 <button class="rotate-handle" @mousedown.stop="startRotate(pattern.id, $event)" @touchstart.stop="startRotate(pattern.id, $event)">
                   <Icon name="ic:baseline-cached" class="text-blue-500" />
                 </button>

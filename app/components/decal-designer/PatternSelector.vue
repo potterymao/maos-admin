@@ -100,8 +100,8 @@ const getPatterns = async () => {
       }
     }
     patterns.value = patternsData; // 直接更新本地 patterns 變數
-    // designStore.SetPatterns(patternsData);
-    console.log("Fetched patterns: 2");
+    designStore.SetPatterns(patternsData);
+    // console.log("Fetched patterns: 2");
   }
 };
 // getPatterns();

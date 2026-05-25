@@ -88,8 +88,7 @@ export const useDesignStore = defineStore("design", {
           query: { category_id: categoryId }
         })
 
-         console.log("Fetched patterns: 1");
-
+        console.log("Fetched patterns: 1", response.data || response);
         // 假設 Shopline 回傳的資料結構在 response.data
         this.SetPatterns(response.data || response)
       } catch (err: any) {
@@ -115,7 +114,7 @@ export const useDesignStore = defineStore("design", {
     // Get Patterns
     SetPatterns(data: any) {
       this.patterns = data;
-      console.log("Patterns set in store:", this.patterns);
+      // console.log("Patterns set in store:", this.patterns);
     },
     
     selectMainPlate(plateId: string) {
