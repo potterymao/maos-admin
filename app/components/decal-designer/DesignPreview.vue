@@ -5,7 +5,7 @@
       {{ $t("_designer.design_complete") }}
     </h2>
 
-    <div ref="printContainerRef">
+    <div ref="printContainerRef" class="final-recipt">
       <div class="final-preview mt-20 py-8 font-mono">
         <div class="preview-container flex p-2" ref="printContentRef">
           <div v-for="(plate, i) in designStore.currentMainPlate?.children">
@@ -108,58 +108,60 @@
           </div>
         </div> -->
       </div>
-    </div>
 
-    <div class="final-preview mt-20 py-8 flex items-center font-mono">
-      <div class="preview-details mt-2" ref="printDetailRef">
-        <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
-          <div class="text-sm font-bold text-gray-500 mb-1">盤子樣式</div>
-          <div class="text-lg font-semibold text-gray-800">
-            {{
-              appStore.locale === "zh-TW"
-                ? designStore.currentMainPlate?.name_zh
-                : designStore.currentMainPlate?.name_en
-            }}
+      <div class="final-preview mt-20 py-8 flex items-center font-mono">
+        <div class="preview-details mt-2" ref="printDetailRef">
+          <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
+            <div class="text-sm font-bold text-gray-500 mb-1">盤子樣式</div>
+            <div class="text-lg font-semibold text-gray-800">
+              {{
+                appStore.locale === "zh-TW"
+                  ? designStore.currentMainPlate?.name_zh
+                  : designStore.currentMainPlate?.name_en
+              }}
+            </div>
           </div>
-        </div>
 
-        <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
-          <div class="text-sm font-bold text-gray-500 mb-1">圖案數量</div>
-          <div class="text-lg font-semibold text-gray-800">
-            {{ totalCartPatterns.length }} 個
-          </div>
-          <div class="mt-2 space-y-1">
-            <div v-for="pattern in totalCartPatterns" :key="pattern.id"
-              class="flex items-center justify-center gap-2 text-sm text-gray-600">
-              <!-- <div class="bg-center bg-no-repeat bg-contain"
+          <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
+            <div class="text-sm font-bold text-gray-500 mb-1">圖案數量</div>
+            <div class="text-lg font-semibold text-gray-800">
+              {{ totalCartPatterns.length }} 個
+            </div>
+            <div class="mt-2 space-y-1">
+              <div v-for="pattern in totalCartPatterns" :key="pattern.id"
+                class="flex items-center justify-center gap-2 text-sm text-gray-600">
+                <!-- <div class="bg-center bg-no-repeat bg-contain"
                   :style="{ backgroundImage: `url(${pattern.image})` }"></div> -->
-              <div class="flex justify-between w-full">
-                <span class="font-bold"> {{
-                  appStore.locale === "zh-TW" ? pattern.name_zh : pattern.name_en }} </span>
-                <span class="font-bold">{{ $t("currency") }} {{ pattern.price }} </span>
+                <div class="flex justify-between w-full">
+                  <span class="font-bold"> {{
+                    appStore.locale === "zh-TW" ? pattern.name_zh : pattern.name_en }} </span>
+                  <span class="font-bold">{{ $t("currency") }} {{ pattern.price }} </span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between gap-2 mt-4 text-sm font-bold text-gray-800">
+                <span>{{ $t("_designer.total_price") }}:</span>
+                <span class="text-lg">${{ designStore.designPrice }}</span>
               </div>
             </div>
-            <div class="flex items-center justify-between gap-2 mt-4 text-sm font-bold text-gray-800">
-              <span>{{ $t("_designer.total_price") }}:</span>
-              <span class="text-lg">${{ designStore.designPrice }}</span>
+          </div>
+
+          <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
+            <div class="text-sm font-bold text-gray-500 mb-1">設計時間</div>
+            <div class="text-lg font-semibold text-gray-800">
+              {{ designStore.designTime }}
             </div>
           </div>
-        </div>
 
-        <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
-          <div class="text-sm font-bold text-gray-500 mb-1">設計時間</div>
-          <div class="text-lg font-semibold text-gray-800">
-            {{ designStore.designTime }}
-          </div>
-        </div>
-
-        <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
-          <div class="text-sm font-bold text-gray-500 mb-1">設計編號</div>
-          <div class="text-lg font-semibold text-gray-800">
-            {{ designStore.designId }}
+          <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
+            <div class="text-sm font-bold text-gray-500 mb-1">設計編號</div>
+            <div class="text-lg font-semibold text-gray-800">
+              {{ designStore.designId }}
+            </div>
           </div>
         </div>
       </div>
+
+
     </div>
 
     <div class="preview-controls">
@@ -284,7 +286,7 @@ const downloadImage = async () => {
   isDownloading.value = true;
 
   try {
-    const element = document.querySelector(".final-preview") as HTMLElement;
+    const element = document.querySelector(".final-recipt") as HTMLElement;
     if (!element) throw new Error("找不到預覽元素");
 
     ElMessage.info("正在生成圖片，請稍候...");
@@ -768,7 +770,8 @@ const printDesign = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap;  /* 允許子元素換行 */
+  flex-wrap: wrap;
+  /* 允許子元素換行 */
 }
 
 .preview-plate {
