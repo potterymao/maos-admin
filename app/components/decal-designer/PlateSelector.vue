@@ -59,7 +59,9 @@ const getPlates = async () => {
 
   if (response && response.items) {
     for (const [i, item] of response.items.entries()) {
-      // console.log("Processing plate:", item);
+      console.log("Processing plate:", item);
+      let w = item.tags[0]?.split("x")[0] || 100;
+      let h = item.tags[0]?.split("x")[1] || 100;
       platesData.push({
         id: item.id,
         name_en: item.title_translations.en,
@@ -67,7 +69,7 @@ const getPlates = async () => {
         image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
         type: item.type,
         size_label: item.feed_variations.size,
-        size: { width: 350, height: 350 },
+        size: { width: w, height: h },
         price: item.lowest_price.dollars || 0,
         children: [],
       });
@@ -80,7 +82,7 @@ const getPlates = async () => {
             name_zh: item.variant_options[j].name_translations["zh-hant"],
             image: variation.media?.images.source.url ? await GetImage(variation.media.images.source.url) : "",
             type: item.type,
-            size: { width: 350, height: 350 },
+            size: { width: w, height: h },
             price: variation.price.dollar || 0,
           });
         }

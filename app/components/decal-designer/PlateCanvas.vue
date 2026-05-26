@@ -14,8 +14,8 @@
             background: currentPlate?.image
               ? `url(${currentPlate.image}) no-repeat center / contain`
               : '#ffffff',
-            width: currentPlate?.size.width * 2 + 'px',
-            height: currentPlate?.size.height * 2 + 'px',
+            width: currentPlate?.size.width * 5 + 'px',
+            height: currentPlate?.size.height * 5 + 'px',
             padding: '10px',
 
           }" @click="clearSelection">
@@ -34,8 +34,7 @@
                 fontSize: getPatternSize(pattern.patternId) + 'px',
               }" @mousedown="startDrag(pattern.id, $event)" @touchstart.stop="startDrag(pattern.id, $event)">
               <div class="pattern-item" v-html="getPatternSvg(pattern.patternId)" :style="{
-                'width': pattern.size.width * 2 + 'px',
-                // 'height': pattern.size.height * 2 + 'px',
+                'width': pattern.size.width * 5 + 'px',
               }" />
 
               <div class="pattern-controls">

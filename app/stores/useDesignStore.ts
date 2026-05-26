@@ -88,7 +88,7 @@ export const useDesignStore = defineStore("design", {
           query: { category_id: categoryId }
         })
 
-        console.log("Fetched patterns: 1", response.data || response);
+        // console.log("Fetched patterns: 1", response.data || response);
         // 假設 Shopline 回傳的資料結構在 response.data
         this.SetPatterns(response.data || response)
       } catch (err: any) {
@@ -180,7 +180,11 @@ export const useDesignStore = defineStore("design", {
         selected: false,
       };
 
+      if (!this.totalPatterns[this.currentPlateIndex]) {
+        this.totalPatterns[this.currentPlateIndex] = [];
+      }
       this.totalPatterns[this.currentPlateIndex].push(placedPattern);
+      this.placedPatterns = this.totalPatterns[this.currentPlateIndex];
 
       this.addToCart.push({
         id: pattern.parent_id,
@@ -431,10 +435,15 @@ export const useDesignStore = defineStore("design", {
 
     resetPlate() {
       // this.patterns = [];
-      this.nextPatternId = 1;
+      // this.nextPatternId = 1;;
       this.selectedPattern = null;
-      this.showPreview = false;
+      // this.showPreview = false;
       this.placedPatterns = [];
+      this.totalPatterns = [];
+      this.totalCartPatterns = [];
+      this.addToCart = [];
+      // this.designId = "";
+      // this.designTime = "";      
     },
 
     // exportDesign() {

@@ -7,11 +7,11 @@
 
     <div ref="printContainerRef">
       <div class="final-preview mt-20 py-8 font-mono">
-        <div class="preview-container flex flex-wrap p-2" ref="printContentRef">
+        <div class="preview-container flex p-2" ref="printContentRef">
           <div v-for="(plate, i) in designStore.currentMainPlate?.children">
             <div class="preview-plate" :style="{
-              width: plate.size.width + 'px',
-              height: plate.size.height + 'px',
+              width: plate.size.width * 4 + 'px',
+              height: plate.size.height * 4 + 'px',
               '-webkit-mask-image': plate.image ? `url(${plate.image})` : 'none',
               'mask-image': plate.image ? `url(${plate.image})` : 'none',
               '-webkit-mask-repeat': 'no-repeat',
@@ -36,11 +36,11 @@
               <div v-for="pattern in designStore.totalPatterns[i]" :key="pattern.id + '-preview'"
                 class="plate-pattern-container" :style="{
                   position: 'absolute',
-                  left: pattern.x / 2 + 'px',
-                  top: pattern.y / 2 + 'px',
+                  left: pattern.x / 1.3 + 'px',
+                  top: pattern.y / 1.3 + 'px',
                   transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
-                  width: pattern.size.width * 1.3 + 'px',
-                  height: pattern.size.height * 1.3 + 'px',
+                  width: pattern.size.width * 4 + 'px',
+                  height: pattern.size.height * 4 + 'px',
                   zIndex: 1
                 }">
                 <div class="plate-pattern" :style="{
@@ -60,7 +60,7 @@
         <!-- </div>
 
       <div class="final-preview"> -->
-        <div class="preview-details mt-2" ref="printDetailRef">
+        <!-- <div class="preview-details mt-2" ref="printDetailRef">
           <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
             <div class="text-sm font-bold text-gray-500 mb-1">盤子樣式</div>
             <div class="text-lg font-semibold text-gray-800">
@@ -80,8 +80,6 @@
             <div class="mt-2 space-y-1">
               <div v-for="pattern in totalCartPatterns" :key="pattern.id"
                 class="flex items-center justify-center gap-2 text-sm text-gray-600">
-                <!-- <div class="bg-center bg-no-repeat bg-contain"
-                  :style="{ backgroundImage: `url(${pattern.image})` }"></div> -->
                 <div class="flex justify-between w-full">
                   <span class="font-bold"> {{
                     appStore.locale === "zh-TW" ? pattern.name_zh : pattern.name_en }} </span>
@@ -107,6 +105,58 @@
             <div class="text-lg font-semibold text-gray-800">
               {{ designStore.designId }}
             </div>
+          </div>
+        </div> -->
+      </div>
+    </div>
+
+    <div class="final-preview mt-20 py-8 flex items-center font-mono">
+      <div class="preview-details mt-2" ref="printDetailRef">
+        <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
+          <div class="text-sm font-bold text-gray-500 mb-1">盤子樣式</div>
+          <div class="text-lg font-semibold text-gray-800">
+            {{
+              appStore.locale === "zh-TW"
+                ? designStore.currentMainPlate?.name_zh
+                : designStore.currentMainPlate?.name_en
+            }}
+          </div>
+        </div>
+
+        <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
+          <div class="text-sm font-bold text-gray-500 mb-1">圖案數量</div>
+          <div class="text-lg font-semibold text-gray-800">
+            {{ totalCartPatterns.length }} 個
+          </div>
+          <div class="mt-2 space-y-1">
+            <div v-for="pattern in totalCartPatterns" :key="pattern.id"
+              class="flex items-center justify-center gap-2 text-sm text-gray-600">
+              <!-- <div class="bg-center bg-no-repeat bg-contain"
+                  :style="{ backgroundImage: `url(${pattern.image})` }"></div> -->
+              <div class="flex justify-between w-full">
+                <span class="font-bold"> {{
+                  appStore.locale === "zh-TW" ? pattern.name_zh : pattern.name_en }} </span>
+                <span class="font-bold">{{ $t("currency") }} {{ pattern.price }} </span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between gap-2 mt-4 text-sm font-bold text-gray-800">
+              <span>{{ $t("_designer.total_price") }}:</span>
+              <span class="text-lg">${{ designStore.designPrice }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
+          <div class="text-sm font-bold text-gray-500 mb-1">設計時間</div>
+          <div class="text-lg font-semibold text-gray-800">
+            {{ designStore.designTime }}
+          </div>
+        </div>
+
+        <div class="mb-12 pb-3 border-b border-gray-200 detail-item">
+          <div class="text-sm font-bold text-gray-500 mb-1">設計編號</div>
+          <div class="text-lg font-semibold text-gray-800">
+            {{ designStore.designId }}
           </div>
         </div>
       </div>
@@ -138,8 +188,6 @@ const appStore = useAppStore();
 const designStore = useDesignStore();
 
 const totalCartPatterns = computed(() => designStore.totalCartPatterns);
-// const currentPlate = computed(() => designStore.currentPlate);
-// const placedPatterns = computed(() => designStore.placedPatterns);
 
 const getImageUrl = (imagePath: string) => {
   if (process.client) {
@@ -703,19 +751,24 @@ const printDesign = async () => {
   align-items: center;
   gap: 40px;
   flex-wrap: wrap;
-  max-width: 800px;
+  /* max-width: 800px; */
   margin: 0 auto;
   /* padding: 40px; */
 }
 
 .preview-container {
-  max-width: 400px;
+  /* max-width: 400px; */
   /* max-height: 500px; */
   position: relative;
   /* overflow: hidden; */
   gap: 40px;
   /* border-radius: 50%;
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15); */
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;  /* 允許子元素換行 */
 }
 
 .preview-plate {
