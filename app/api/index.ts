@@ -3,11 +3,14 @@
 export async function GetImage(url: string) {
   try {
     // 呼叫我們寫好的 Server API Proxy
-    const response = await $fetch<any>(url, {
+    const response = await $fetch.raw(url, {
       method: 'GET',
     })
 
-    const blob = response;
+    // const cookies = response.headers.getSetCookie()
+    // console.log('获取到的外部域名 Cookie:', cookies)
+
+    const blob = response._data as Blob;
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result);
@@ -28,7 +31,9 @@ export async function AddToCart(addData: any) {
       method: 'POST',
       body: { "affiliate_campaign_id": merchantId, "products": addData }
     })
-
+    // console.log('获取到的外部域名 response:', response)
+    // const cookies = response.headers.getSetCookie()
+    // console.log('获取到的外部域名 Cookie:', cookies)
     return response;
   } catch (err: any) {
     console.error('AddToCart Error:', err);
@@ -36,9 +41,38 @@ export async function AddToCart(addData: any) {
   }
 }
 
+// Get Cart ID
+export async function GetCartId(id: string) {
+  try {
+    const response = await  $fetch<any>(`/api/shopline/carts/find`, {
+      credentials: 'include',
+      method: 'GET',
+      query: { 'owner_id': id, 'owner_type': 'Guest' }
+    })
+
+    return response.data.cart_id;
+  } catch (err: any) {
+    console.error('AddToCart Error:', err);
+    throw err;
+  }
+}
+
+// Get Cart
+export async function GetCart(id: string) {
+  try {
+    const response = await $fetch<any>(`/api/shopline/carts/${id}`, {
+      method: 'GET',
+    })
+
+    return response.data;
+  } catch (err: any) {
+    console.error('AddToCart Error:', err);
+    throw err;
+  }
+}
 
 export async function GetExchangeCart() {
-  
+
   try {
   } catch (err: any) {
   }

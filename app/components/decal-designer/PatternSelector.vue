@@ -46,6 +46,7 @@
 // import { onMounted } from "vue";
 import type { SelectMenuItem } from "@nuxt/ui";
 import { GetImage } from "@/api";
+import { parsePhysicalDimensions } from "@/utils/physical-size";
 
 const appStore = useAppStore();
 const designStore = useDesignStore();
@@ -82,22 +83,29 @@ const getPatterns = async () => {
     for (const item of response.items) {
       if (item.variations && item.variations.length > 0) {
         for (const [i, variation] of item.variations.entries()) {
-          let w = variation.feed_variations.size.split("x")[0] || 50;
-          let h = variation.feed_variations.size.split("x")[1] || 50
-          h = h.split("mm")[0];
+          const feedVariation = variation.feed_variations || {};
+          const physicalSize = parsePhysicalDimensions(
+            feedVariation.size,
+            { width: 50, height: 50 },
+          );
           patternsData.push({
             id: variation.id,
             parent_id: item.id,
-            name_en: item.variant_options[i].name_translations.en,
-            name_zh: item.variant_options[i].name_translations["zh-hant"],
+            name_en: feedVariation.custom?.en
+              || item.variant_options?.[i]?.name_translations?.en
+              || item.title_translations?.en
+              || "",
+            name_zh: feedVariation.custom?.["zh-hant"]
+              || item.variant_options?.[i]?.name_translations?.["zh-hant"]
+              || item.title_translations?.["zh-hant"]
+              || "",
             image: variation.media?.images.source.url ? await GetImage(variation.media.images.source.url) : "",
             price: variation.price.dollars || 0,
             price_label: variation.price.label,
             tags: item.tags || [],
-            size: {
-              width: w,
-              height: h
-            },
+            size_label: feedVariation.size || "",
+            physical_size: physicalSize,
+            size: physicalSize,
             defaultSize: null,
           })
         }
@@ -111,7 +119,8 @@ const getPatterns = async () => {
 // getPatterns();
 
 // 初始化數據
-initData();
+// Pattern images are converted with FileReader and must load in the browser.
+onMounted(initData);
 
 // 過濾圖案
 const filteredPatterns = computed(() => {

@@ -39,6 +39,8 @@
 
 <script setup lang="ts">
 import { GetImage } from "@/api";
+import { cropTransparentImage } from "@/utils/crop-transparent-image";
+import { parsePhysicalDimensions } from "@/utils/physical-size";
 // import IconPlate from "@/assets/images/svg/plate.svg";
 
 const appStore = useAppStore();
@@ -59,30 +61,47 @@ const getPlates = async () => {
 
   if (response && response.items) {
     for (const [i, item] of response.items.entries()) {
-      console.log("Processing plate:", item);
-      let w = item.tags[0]?.split("x")[0] || 100;
-      let h = item.tags[0]?.split("x")[1] || 100;
+      // console.log("Processing plate:", item);
+      const physicalSize = parsePhysicalDimensions(item.feed_variations.size);
       platesData.push({
         id: item.id,
         name_en: item.title_translations.en,
         name_zh: item.title_translations["zh-hant"],
-        image: item.medias?.[0]?.images.source.url ? await GetImage(item.medias?.[0]?.images.source.url) : "",
+        image: item.medias?.[0]?.images.source.url
+          ? await cropTransparentImage(await GetImage(item.medias[0].images.source.url))
+          : "",
         type: item.type,
         size_label: item.feed_variations.size,
-        size: { width: w, height: h },
+        size: physicalSize,
         price: item.lowest_price.dollars || 0,
         children: [],
       });
 
       if (item.variations && item.variations.length > 0) {
         for (const [j, variation] of item.variations.entries()) {
+          const variationSize = parsePhysicalDimensions(
+            variation.feed_variations?.size,
+            physicalSize,
+          );
+          const isSideSurface = item.id === "69f2f69560e697a7e0148919" && j === 2;
+          const surfaceSize = isSideSurface
+            ? {
+                width: variationSize.width,
+                height: variationSize.width,
+                depth: variationSize.depth || physicalSize.depth || 20,
+              }
+            : variationSize;
           platesData[i].children.push({
             id: variation.id,
             name_en: item.variant_options[j].name_translations.en,
             name_zh: item.variant_options[j].name_translations["zh-hant"],
-            image: variation.media?.images.source.url ? await GetImage(variation.media.images.source.url) : "",
+            image: variation.media?.images.source.url
+              ? await cropTransparentImage(await GetImage(variation.media.images.source.url))
+              : "",
             type: item.type,
-            size: { width: w, height: h },
+            size: surfaceSize,
+            physical_size: variationSize,
+            surface: isSideSurface ? "side" : (j === 1 ? "back" : "front"),
             price: variation.price.dollar || 0,
           });
         }
@@ -94,7 +113,8 @@ const getPlates = async () => {
 };
 
 // 初始化數據
-initData();
+// Image conversion uses FileReader, so plate data must be prepared in the browser.
+onMounted(initData);
 
 </script>
 

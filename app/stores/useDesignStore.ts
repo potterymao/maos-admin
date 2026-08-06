@@ -1,7 +1,8 @@
 import { defineStore } from "pinia";
-import { GetImage } from "@/api";
-import type { Plate, PlateDesign, PlateStyle, Pattern, PlacedPattern, DesignState } from "~~/types";
-// import { pa } from "element-plus/es/locale/index.mjs";
+import { useCookie } from 'nuxt/app';
+import type { Plate, PlacedPattern } from "~~/types";
+
+
 
 export const useDesignStore = defineStore("design", {
   state: () => ({
@@ -26,6 +27,9 @@ export const useDesignStore = defineStore("design", {
     loading: false,
     error: null as string | null,
     isFlipped: false,
+
+    shopline_session_id: null as string | null,
+    cartId: null as string | null,
   }),
 
   getters: {
@@ -56,13 +60,20 @@ export const useDesignStore = defineStore("design", {
 
       try {
         // 呼叫我們寫好的 Server API Proxy
-        const response = await $fetch<any>('/api/shopline/products/search', {
+        const response = await $fetch.raw('/api/shopline/products/search', {
           method: 'POST',
           query: { category_id: categoryId }
         })
 
+        
+        // const allCookies = Cookies.get();
+        // console.log(allCookies);
+        // console.log('获取到的外部域名 Cookie:', response)
+        // const cookies = response.headers.entries()
+        // console.log('获取到的外部域名 Cookie:', cookies)
+
         // 假設 Shopline 回傳的資料結構在 response.data
-        this.SetPlates(response.data || response)
+        this.SetPlates(response._data || response)
       } catch (err: any) {
         this.error = err.data?.message || '抓取資料失敗'
         console.error('Store fetchPlates Error:', err)
@@ -83,20 +94,47 @@ export const useDesignStore = defineStore("design", {
 
       try {
         // 呼叫我們寫好的 Server API Proxy
-        const response = await $fetch<any>('/api/shopline/products/search', {
+        const response = await $fetch.raw('/api/shopline/products/search', {
           method: 'POST',
           query: { category_id: categoryId }
         })
-
+        // console.log('获取到的外部域名 Cookie:', response.headers['set-cookie'])
         // console.log("Fetched patterns: 1", response.data || response);
         // 假設 Shopline 回傳的資料結構在 response.data
-        this.SetPatterns(response.data || response)
+        this.SetPatterns(response._data || response)
       } catch (err: any) {
         this.error = err.data?.message || '抓取資料失敗'
         console.error('Store fetchPatterns Error:', err)
       } finally {
         this.loading = false
       }
+    },
+
+    async getSessionId() {
+      this.shopline_session_id = getSessionId() || "";
+    },
+
+    // GetCookie
+    async getCartId() {
+      // this.shopline_session_id = getSessionId() || "";
+      try {
+        // 呼叫我們寫好的 Server API Proxy
+        const response = await $fetch<any>('/api/shopline/carts/find', {
+          method: 'POST',
+          query: { owner_id: this.shopline_session_id }
+        })
+
+        this.cartId = response.data?.cart_id || '';
+      } catch (err: any) {
+        // this.error = err.data?.message || '抓取Cart id失敗'
+        console.error('Store fetchPatterns Error:', err)
+      } finally {
+        // this.loading = false
+      }
+
+
+
+      //  return useCookie<string | null>('_prod_shopline_auth_session_id_v3').value || null
     },
 
     // 設定 Plates
@@ -116,7 +154,7 @@ export const useDesignStore = defineStore("design", {
       this.patterns = data;
       // console.log("Patterns set in store:", this.patterns);
     },
-    
+
     selectMainPlate(plateId: string) {
       const plate = this.getPlateById(plateId);
       if (plate) {
@@ -167,12 +205,13 @@ export const useDesignStore = defineStore("design", {
         price: pattern.price,
         price_label: pattern.price_label,
         // position: { x: this.currentPlate.size.width / 2 - pattern.defaultSize / 2, y: this.currentPlate.size.height / 2 - pattern.defaultSize / 2 },
-        x: this.currentPlate.size.width / 2 - pattern.defaultSize / 2,
-        y: this.currentPlate.size.height / 2 - pattern.defaultSize / 2,
+        x: (Number(this.currentPlate.size.width) - Number(pattern.size.width)) / 2,
+        y: (Number(this.currentPlate.size.height) - Number(pattern.size.height)) / 2,
         size: {
           width: pattern.size.width,
           height: pattern.size.height,
         },
+        physicalSize: pattern.physical_size || pattern.size,
         rotation: 0,
         angle: 0,
         scale: 1,
@@ -198,8 +237,8 @@ export const useDesignStore = defineStore("design", {
         price: pattern.price,
         name_zh: pattern.name_zh,
         name_en: pattern.name_en,
-        width: pattern.size.width,
-        height: pattern.size.height,
+        width: pattern.physical_size?.width || pattern.size.width,
+        height: pattern.physical_size?.height || pattern.size.height,
       });
 
 
@@ -209,16 +248,16 @@ export const useDesignStore = defineStore("design", {
     removePattern(id: string) {
       let index = this.placedPatterns.findIndex((p) => p.id === id);
       let parent_id = this.placedPatterns.find((p) => p.id === id)?.parentId;
-      
+
       if (index !== -1) {
         this.placedPatterns.splice(index, 1);
-      }      
+      }
 
-      if ( this.addToCart.findIndex((p) => p.id === parent_id) !== -1) {
+      if (this.addToCart.findIndex((p) => p.id === parent_id) !== -1) {
         this.addToCart.splice(index, 1);
       }
 
-      if ( this.totalCartPatterns.findIndex((p) => p.id === id) !== -1) {
+      if (this.totalCartPatterns.findIndex((p) => p.id === id) !== -1) {
         this.totalCartPatterns.splice(index, 1);
       }
     },
@@ -230,8 +269,8 @@ export const useDesignStore = defineStore("design", {
         const originPattern = this.getPatternById(pattern.patternId);
         if (!originPattern || !this.currentPlate) return;
 
-        pattern.x = this.currentPlate.size.width / 2 - originPattern.defaultSize / 2;
-        pattern.y = this.currentPlate.size.height / 2 - originPattern.defaultSize / 2;
+        pattern.x = (Number(this.currentPlate.size.width) - Number(originPattern.size.width)) / 2;
+        pattern.y = (Number(this.currentPlate.size.height) - Number(originPattern.size.height)) / 2;
       }
     },
 
@@ -437,7 +476,7 @@ export const useDesignStore = defineStore("design", {
       // this.patterns = [];
       // this.nextPatternId = 1;;
       this.selectedPattern = null;
-      // this.showPreview = false;
+      this.showPreview = false;
       this.placedPatterns = [];
       this.totalPatterns = [];
       this.totalCartPatterns = [];

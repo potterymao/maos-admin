@@ -1,6 +1,7 @@
 const SYSTEM_NAME = "Maos"
 
 export class CacheKey {
+  static readonly SHOP_SESSION_ID = `_prod_shopline_auth_session_id_v3`
   static readonly TOKEN = `${SYSTEM_NAME}-token-key`
   static readonly LOCALE = `${SYSTEM_NAME}-locale`
   static readonly USER = `${SYSTEM_NAME}-user`

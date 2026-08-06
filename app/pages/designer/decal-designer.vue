@@ -59,6 +59,8 @@ import { useDesignStore } from "~/stores/useDesignStore";
 // const { startDrag, startResize, startRotate } = usePlateDesigner();
 
 const designStore = useDesignStore();
+
+_setToken('');
 </script>
 
 <style scoped>

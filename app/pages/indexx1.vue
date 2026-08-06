@@ -12,7 +12,7 @@
         <el-row>
           <!-- 選擇盤子 -->
           <ElCard shadow="hover">
-            <h2 class="text-xl font-bold mb-3">選擇盤子</h2>
+            <h2 class="text-xl font-bold mb-3">選擇器皿</h2>
             <ElSelect v-model="store.plateType" placeholder="選擇盤子類型" class="w-48">
               <ElOption v-for="opt in plateOptions" :key="opt.value" :label="opt.label" :value="opt.value" />
             </ElSelect>

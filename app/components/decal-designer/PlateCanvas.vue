@@ -14,9 +14,9 @@
             background: currentPlate?.image
               ? `url(${currentPlate.image}) no-repeat center / contain`
               : '#ffffff',
-            width: currentPlate?.size.width * 5 + 'px',
-            height: currentPlate?.size.height * 5 + 'px',
-            padding: '10px',
+            width: currentPlate ? `${Number(currentPlate.size.width) * DESIGN_SCALE}px` : '0',
+            height: currentPlate ? `${Number(currentPlate.size.height) * DESIGN_SCALE}px` : '0',
+            padding: '0',
 
           }" @click="clearSelection">
           <!-- <div v-if="placedPatterns.length === 0"
@@ -28,13 +28,16 @@
 
             <div v-for="pattern in placedPatterns" :key="pattern.id" class="pattern-on-plate"
               :class="{ selected: pattern.selected }" :style="{
-                left: pattern.x + 'px',
-                top: pattern.y + 'px',
+                left: pattern.x * DESIGN_SCALE + 'px',
+                top: pattern.y * DESIGN_SCALE + 'px',
                 transform: `rotate(${pattern.rotation}deg)`,
+                width: pattern.size.width * DESIGN_SCALE + 'px',
+                height: pattern.size.height * DESIGN_SCALE + 'px',
                 fontSize: getPatternSize(pattern.patternId) + 'px',
               }" @mousedown="startDrag(pattern.id, $event)" @touchstart.stop="startDrag(pattern.id, $event)">
               <div class="pattern-item" v-html="getPatternSvg(pattern.patternId)" :style="{
-                'width': pattern.size.width * 5 + 'px',
+                width: '100%',
+                height: '100%',
               }" />
 
               <div class="pattern-controls">
@@ -49,12 +52,12 @@
           </div>
         </div>
 
-        <div class="flex gap-3 py-4">
-          <el-button type="danger" @click="designStore.resetPlate">
+        <div class="flex gap-3 pt-4 pb-2">
+          <el-button type="danger" @click="resetDesign">
             <Icon name="ic:round-restart-alt" class="text-[20px] mr-1" />
-            重置盤子
+            重新設計
           </el-button>
-          <el-button type="primary" @click="designStore.finishDesign">
+          <el-button type="primary" @click="previewDesign">
             <i class="i-mdi-eye mr-1"></i>
             預覽設計
           </el-button>
@@ -63,6 +66,7 @@
             匯出設計
           </el-button> -->
         </div>
+        <p v-if="boundaryError" class="boundary-error">已超出器皿範圍喔!</p>
       </div>
     </div>
 
@@ -71,11 +75,98 @@
 
 <script setup lang="ts">
 const designStore = useDesignStore();
+const DESIGN_SCALE = 4;
 
 // 計算屬性
 const currentPlate = computed(() => designStore.currentPlate);
 const placedPatterns = computed(() => designStore.placedPatterns || []);
 const selectedPattern = computed(() => designStore.selectedPattern);
+const boundaryError = ref(false);
+
+type Point = { x: number; y: number };
+
+const pointInPolygon = (point: Point, polygon: Point[]) => {
+  let inside = false;
+  for (let current = 0, previous = polygon.length - 1; current < polygon.length; previous = current, current += 1) {
+    const a = polygon[current];
+    const b = polygon[previous];
+    const intersects = ((a.y > point.y) !== (b.y > point.y))
+      && point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x;
+    if (intersects) inside = !inside;
+  }
+  return inside;
+};
+
+const isPointInsidePlate = (point: Point, plate: any) => {
+  const width = Number(plate?.size?.width || 0);
+  const height = Number(plate?.size?.height || width);
+  if (!width || !height) return false;
+
+  const mainPlateId = String(designStore.currentMainPlate?.id || "");
+  if (mainPlateId === "69f2f7eaf29a57c710185414") {
+    const houseOutline = [
+      { x: width * 0.47, y: 0 },
+      { x: width * 0.53, y: 0 },
+      { x: width, y: height * 0.40 },
+      { x: width, y: height },
+      { x: 0, y: height },
+      { x: 0, y: height * 0.40 },
+    ];
+    return pointInPolygon(point, houseOutline);
+  }
+
+  const normalizedX = (point.x - width / 2) / (width / 2);
+  const normalizedY = (point.y - height / 2) / (height / 2);
+  return normalizedX ** 2 + normalizedY ** 2 <= 0.98 ** 2;
+};
+
+const isPatternInsidePlate = (pattern: any, plate: any) => {
+  const width = Number(pattern.size?.width || 0);
+  const height = Number(pattern.size?.height || 0);
+  const centerX = Number(pattern.x || 0) + width / 2;
+  const centerY = Number(pattern.y || 0) + height / 2;
+  const angle = Number(pattern.rotation || 0) * Math.PI / 180;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  const samples: Point[] = [];
+
+  for (let step = 0; step <= 8; step += 1) {
+    const ratio = step / 8;
+    samples.push(
+      { x: -width / 2 + width * ratio, y: -height / 2 },
+      { x: -width / 2 + width * ratio, y: height / 2 },
+      { x: -width / 2, y: -height / 2 + height * ratio },
+      { x: width / 2, y: -height / 2 + height * ratio },
+    );
+  }
+
+  return samples.every((sample) => isPointInsidePlate({
+    x: centerX + sample.x * cos - sample.y * sin,
+    y: centerY + sample.x * sin + sample.y * cos,
+  }, plate));
+};
+
+const hasOutOfBoundsPattern = () => {
+  const surfaces = designStore.currentMainPlate?.children || [];
+  return (designStore.totalPatterns || []).some((patterns: any[], index: number) => {
+    const plate = surfaces[index] || designStore.currentPlate;
+    return (patterns || []).some((pattern) => !isPatternInsidePlate(pattern, plate));
+  });
+};
+
+const previewDesign = () => {
+  boundaryError.value = hasOutOfBoundsPattern();
+  if (boundaryError.value) {
+    designStore.showPreview = false;
+    return;
+  }
+  designStore.finishDesign();
+};
+
+const resetDesign = () => {
+  boundaryError.value = false;
+  designStore.resetPlate();
+};
 
 const clearSelection = () => {
   designStore.patterns.forEach((p) => (p.selected = false));
@@ -120,10 +211,8 @@ const getContainerRect = () => {
 const updatePatternPosition = (id: any, newLeft: number, newTop: number) => {
   // const pattern = patterns.value.find(p => p.id === id);
   if (!selectedPattern.value) return;
-  const containerRect = getContainerRect();
-  if (!containerRect) return;
-  const maxLeft = containerRect.width - selectedPattern.value.size.width;
-  const maxTop = containerRect.height - selectedPattern.value.size.height;
+  const maxLeft = Math.max(0, Number(currentPlate.value?.size?.width || 0) - Number(selectedPattern.value.size.width));
+  const maxTop = Math.max(0, Number(currentPlate.value?.size?.height || 0) - Number(selectedPattern.value.size.height));
   selectedPattern.value.x = Math.min(Math.max(0, newLeft), maxLeft);
   selectedPattern.value.y = Math.min(Math.max(0, newTop), maxTop);
 };
@@ -142,10 +231,10 @@ const getPatternScreenCenter = (pattern: any) => {
   const containerRect = getContainerRect();
   if (!containerRect) return;
   // 图案在容器内的绝对坐标 left, top (未旋转时的位置)
-  const absLeft = containerRect.left + pattern.x;
-  const absTop = containerRect.top + pattern.y;
-  const centerX = absLeft + pattern.size.width / 2;
-  const centerY = absTop + pattern.size.height / 2;
+  const absLeft = containerRect.left + pattern.x * DESIGN_SCALE;
+  const absTop = containerRect.top + pattern.y * DESIGN_SCALE;
+  const centerX = absLeft + pattern.size.width * DESIGN_SCALE / 2;
+  const centerY = absTop + pattern.size.height * DESIGN_SCALE / 2;
   return { x: centerX, y: centerY };
 };
 
@@ -416,8 +505,8 @@ const onGlobalMouseMove = (e: any) => {
   if (isDragging && selectedPattern.value && selectedPattern.value.id !== null) {
     const dx = clientX - dragStartX;
     const dy = clientY - dragStartY;
-    const newLeft = originalLeft + dx;
-    const newTop = originalTop + dy;
+    const newLeft = originalLeft + dx / DESIGN_SCALE;
+    const newTop = originalTop + dy / DESIGN_SCALE;
     updatePatternPosition(dragTargetId, newLeft, newTop);
   }
   else if (isRotating && rotatingId !== null) {
@@ -450,10 +539,9 @@ const onGlobalMouseUp = () => {
 
 const handleWindowResize = () => {
   if (!plateContainerRef.value) return;
-  const containerRect = plateContainerRef.value.getBoundingClientRect();
   placedPatterns.value.forEach(p => {
-    const maxLeft = containerRect.width - p.size.width;
-    const maxTop = containerRect.height - p.size.height;
+    const maxLeft = Math.max(0, Number(currentPlate.value?.size?.width || 0) - Number(p.size.width));
+    const maxTop = Math.max(0, Number(currentPlate.value?.size?.height || 0) - Number(p.size.height));
     p.x = Math.min(Math.max(0, p.x), maxLeft);
     p.y = Math.min(Math.max(0, p.y), maxTop);
   });
@@ -523,6 +611,7 @@ onUnmounted(() => {
   /* width: 400px;
   height: 400px; */
   position: relative;
+  box-sizing: border-box;
   margin-bottom: 20px;
   transform-style: preserve-3d;
   transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -552,6 +641,21 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.boundary-error {
+  width: 100%;
+  margin: 0 0 8px;
+  color: #dc2626;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.pattern-item :deep(img) {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .selected-info {
