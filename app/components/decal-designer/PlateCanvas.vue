@@ -117,7 +117,10 @@ const isPointInsidePlate = (point: Point, plate: any) => {
 
   const normalizedX = (point.x - width / 2) / (width / 2);
   const normalizedY = (point.y - height / 2) / (height / 2);
-  return normalizedX ** 2 + normalizedY ** 2 <= 0.98 ** 2;
+  const isDessertBowlFront = mainPlateId === "69f2f69560e697a7e0148919"
+    && (plate?.surface === "front" || plate?.surface == null);
+  const printableRadius = isDessertBowlFront ? 0.72 : 0.98;
+  return normalizedX ** 2 + normalizedY ** 2 <= printableRadius ** 2;
 };
 
 const isPatternInsidePlate = (pattern: any, plate: any) => {
@@ -167,6 +170,21 @@ const resetDesign = () => {
   boundaryError.value = false;
   designStore.resetPlate();
 };
+
+watch(
+  [
+    () => designStore.currentMainPlate?.id,
+    () => designStore.currentPlate?.id,
+    () => designStore.totalPatterns,
+  ],
+  async () => {
+    await nextTick();
+    const isOutOfBounds = hasOutOfBoundsPattern();
+    boundaryError.value = isOutOfBounds;
+    if (isOutOfBounds) designStore.showPreview = false;
+  },
+  { deep: true, flush: "post" },
+);
 
 const clearSelection = () => {
   designStore.patterns.forEach((p) => (p.selected = false));
