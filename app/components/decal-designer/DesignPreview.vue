@@ -239,7 +239,13 @@
     </div>
 
     <div class="preview-controls">
-      <el-button @click="downloadImage" type="success" class="text-xl">
+      <el-button
+        @click="downloadImage"
+        type="success"
+        class="text-xl"
+        :loading="isDownloading"
+        :disabled="isDownloading"
+      >
         <Icon name="material-symbols:download-rounded" class="text-xl mr-1" />
         下載圖片
       </el-button>
@@ -247,7 +253,13 @@
         <Icon name="material-symbols:print-rounded" class="text-xl mr-1" />
         列印設計
       </el-button>
-      <el-button @click="finishDesign" type="primary" class="text-xl">
+      <el-button
+        @click="finishDesign"
+        type="primary"
+        class="text-xl"
+        :loading="isAddingToCart"
+        :disabled="isAddingToCart"
+      >
         <Icon name="material-symbols:shopping-cart-outline" class="text-xl mr-1" />
         加到購物車
       </el-button>
@@ -258,7 +270,7 @@
 <script setup lang="ts">
 import html2canvas from "html2canvas-pro";
 
-import { GetCart, GetCartId, AddToCart } from "@/api";
+import { AddToCart } from "@/api";
 
 const appStore = useAppStore();
 const designStore = useDesignStore();
@@ -358,6 +370,7 @@ watch(
 // };
 const isDownloading = ref(false);
 const isPrinting = ref(false);
+const isAddingToCart = ref(false);
 
 designStore.getSessionId();
 // function initialSessionID() {
@@ -390,37 +403,90 @@ designStore.getSessionId();
 //   await Promise.all(promises);
 // };
 
+const waitForExportAssets = async (element: HTMLElement) => {
+  await nextTick();
+  await document.fonts?.ready;
+
+  const pendingImages = Array.from(element.querySelectorAll("img"))
+    .filter((image) => !image.complete)
+    .map(
+      (image) =>
+        new Promise<void>((resolve) => {
+          image.addEventListener("load", () => resolve(), { once: true });
+          image.addEventListener("error", () => resolve(), { once: true });
+        }),
+    );
+
+  await Promise.all(pendingImages);
+  await new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+  );
+};
+
+const canvasToBlob = (canvas: HTMLCanvasElement) =>
+  new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("Unable to encode image"))),
+      "image/jpeg",
+      0.94,
+    );
+  });
+
 const downloadImage = async () => {
   if (!process.client) return;
 
   isDownloading.value = true;
 
   try {
-    const element = document.querySelector(".final-recipt") as HTMLElement;
-    if (!element) throw new Error("找不到預覽元素");
+    const previewElement = printContentRef.value as HTMLElement | null;
+    const detailElement = printDetailRef.value as HTMLElement | null;
+    const containerElement = printContainerRef.value as HTMLElement | null;
+    if (!previewElement || !detailElement || !containerElement) {
+      throw new Error("找不到預覽元素");
+    }
 
     ElMessage.info("正在生成圖片，請稍候...");
 
-    // 預加載所有圖片
-    // await preloadImages(element);
+    await waitForExportAssets(containerElement);
 
-    // 生成圖片
-    // const canvas = await html2canvas(element, {
-    const canvas = await html2canvas(printContainerRef.value, {
-      scale: 4, // 4倍解析度
+    const captureOptions = {
+      scale: 2,
       backgroundColor: "#ffffff",
       allowTaint: false,
       useCORS: true,
       logging: false,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight,
-    });
+    };
+    const [previewCanvas, detailCanvas] = await Promise.all([
+      html2canvas(previewElement, captureOptions),
+      html2canvas(detailElement, captureOptions),
+    ]);
 
-    // 下載圖片
+    const gap = 32;
+    const padding = 40;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(previewCanvas.width, detailCanvas.width) + padding * 2;
+    canvas.height = previewCanvas.height + detailCanvas.height + gap + padding * 2;
+
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("無法建立下載圖片");
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(previewCanvas, (canvas.width - previewCanvas.width) / 2, padding);
+    context.drawImage(
+      detailCanvas,
+      (canvas.width - detailCanvas.width) / 2,
+      padding + previewCanvas.height + gap,
+    );
+
+    const blob = await canvasToBlob(canvas);
+    const objectUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.download = `design-${designStore.designId || Date.now()}.jpg`;
-    link.href = canvas.toDataURL("image/jpeg");
+    link.href = objectUrl;
+    document.body.appendChild(link);
     link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 
     ElMessage.success("圖片下載成功！");
   } catch (error) {
@@ -432,40 +498,44 @@ const downloadImage = async () => {
 };
 
 const finishDesign = async () => {
-  const res = await $fetch.raw(`https://open.shopline.io/v1/merchants`, {
-    credentials: 'include',
-    method: 'GET'
-  })
-  console.log(res);
-  // 取購物車
-  // designStore.getCartId();
-  // if (designStore.cartId) {
-  //   const cart_list = await GetCart(designStore.cartId);
-  //   console.log("Cart list:", cart_list);
-  // }
-  // 0251d830e5f008f8ad2d0945451e39ed
-  const cartId = await GetCartId('0251d830e5f008f8ad2d0945451e39ed');
-  // console.log("Cart list:", cartId);
+  if (!process.client || isAddingToCart.value) return;
 
-  const cartData = await GetCart(cartId);
-  console.log("Cart data:", cartData);
-  // 最後加入器型到購物車列表
-  designStore.addToCart.push({
-    id: designStore.currentMainPlate?.id,
-    variation_id: designStore.currentMainPlate?.children[0]?.id,
-  })
-
-  // console.log("Final cart items:", designStore.addToCart);
-  const response = await AddToCart(designStore.addToCart);
-  if (response) {
-    window.open(response.link, "_blank");
-    ElMessage.success("已成功加入購物車！");
-    // ElMessage.success("感謝您的設計！我們將盡快與您聯繫確認訂單細節。");
-  } else {
-    ElMessage.error("加入購物車失敗，請稍後重試");
+  const plateId = designStore.currentMainPlate?.id;
+  const variationId = designStore.currentMainPlate?.children?.[0]?.id;
+  if (!plateId || !variationId) {
+    ElMessage.error("找不到器皿資料，請重新選擇器皿");
+    return;
   }
 
-  // designStore.finishDesign();
+  isAddingToCart.value = true;
+
+  try {
+    const products = [
+      ...designStore.addToCart,
+      { id: plateId, variation_id: variationId },
+    ];
+    const response = await AddToCart(products);
+    const cartLink = response?.link || response?.data?.link;
+
+    if (!cartLink) throw new Error("Shopline did not return a cart link");
+
+    const cartWindow = window.open(cartLink, "_blank", "noopener,noreferrer");
+    if (!cartWindow) {
+      const link = document.createElement("a");
+      link.href = cartLink;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+    ElMessage.success("已成功加入購物車！");
+  } catch (error) {
+    console.error("加入購物車失敗:", error);
+    ElMessage.error("加入購物車失敗，請稍後重試");
+  } finally {
+    isAddingToCart.value = false;
+  }
 };
 
 // 列印設計
