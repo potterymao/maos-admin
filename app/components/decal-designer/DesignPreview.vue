@@ -63,11 +63,11 @@
                   <div v-for="pattern in designStore.totalPatterns?.[surfaceIndex] || []"
                     :key="pattern.id + '-preview'" class="plate-pattern-container" :style="{
                       position: 'absolute',
-                      left: pattern.x * PREVIEW_SCALE + 'px',
-                      top: pattern.y * PREVIEW_SCALE + 'px',
+                      left: `${(Number(pattern.x) / Number(plate.size.width)) * 100}%`,
+                      top: `${(Number(pattern.y) / Number(plate.size.height)) * 100}%`,
                       transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
-                      width: pattern.size.width * PREVIEW_SCALE + 'px',
-                      height: pattern.size.height * PREVIEW_SCALE + 'px',
+                      width: `${(Number(pattern.size.width) / Number(plate.size.width)) * 100}%`,
+                      height: `${(Number(pattern.size.height) / Number(plate.size.height)) * 100}%`,
                       zIndex: 1
                     }">
                     <div class="plate-pattern" :style="{
