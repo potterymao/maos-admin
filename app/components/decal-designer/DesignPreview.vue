@@ -84,11 +84,16 @@
           </div>
         </div>
 
-        <div ref="printContentRef" class="preview-container pdf-preview-container flex p-2">
+        <div
+          ref="printContentRef"
+          class="preview-container pdf-preview-container flex p-2"
+          :style="{ '--pdf-surface-count': pdfPreviewSurfaces.length }"
+        >
           <div v-for="(plate, surfaceIndex) in pdfPreviewSurfaces" :key="`${plate.id}-pdf`">
-            <div class="preview-plate" :style="{
+            <div class="preview-plate pdf-preview-plate" :style="{
               width: plate.size.width * PREVIEW_SCALE + 'px',
               height: plate.size.height * PREVIEW_SCALE + 'px',
+              aspectRatio: `${plate.size.width} / ${plate.size.height}`,
               '-webkit-mask-image': plate.image ? `url(${plate.image})` : 'none',
               'mask-image': plate.image ? `url(${plate.image})` : 'none',
               '-webkit-mask-repeat': 'no-repeat',
@@ -111,11 +116,11 @@
               <div v-for="pattern in designStore.totalPatterns?.[surfaceIndex] || []"
                 :key="pattern.id + '-pdf-preview'" class="plate-pattern-container" :style="{
                   position: 'absolute',
-                  left: pattern.x * PREVIEW_SCALE + 'px',
-                  top: pattern.y * PREVIEW_SCALE + 'px',
+                  left: `${(Number(pattern.x) / Number(plate.size.width)) * 100}%`,
+                  top: `${(Number(pattern.y) / Number(plate.size.height)) * 100}%`,
                   transform: `rotate(${pattern.rotation}deg) scale(${pattern.scale})`,
-                  width: pattern.size.width * PREVIEW_SCALE + 'px',
-                  height: pattern.size.height * PREVIEW_SCALE + 'px',
+                  width: `${(Number(pattern.size.width) / Number(plate.size.width)) * 100}%`,
+                  height: `${(Number(pattern.size.height) / Number(plate.size.height)) * 100}%`,
                   zIndex: 1
                 }">
                 <div class="plate-pattern" :style="{
@@ -1087,7 +1092,13 @@ const printDesign = async () => {
 .preview-controls {
   display: flex;
   justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
   margin-top: 50px;
+}
+
+.preview-controls :deep(.el-button + .el-button) {
+  margin-left: 0;
 }
 
 .el-button:hover {
@@ -1107,6 +1118,16 @@ const printDesign = async () => {
 }
 
 @media (max-width: 768px) {
+  .preview-section {
+    margin-top: 48px;
+    padding-top: 12px;
+  }
+
+  .preview-title {
+    margin-block: 36px 24px;
+    font-size: 2rem;
+  }
+
   .plate-options {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1116,12 +1137,42 @@ const printDesign = async () => {
   }
 
   .preview-container {
-    width: 350px;
-    height: 350px;
+    width: 100%;
+    height: auto;
   }
 
   .final-preview {
     flex-direction: column;
+    width: 100%;
+    margin-top: 32px;
+    padding-block: 16px;
+    gap: 20px;
+  }
+
+  .pdf-preview-container {
+    display: grid;
+    grid-template-columns: repeat(var(--pdf-surface-count), minmax(0, 1fr));
+    gap: 8px;
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  .pdf-preview-container > div {
+    min-width: 0;
+  }
+
+  .pdf-preview-plate {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .preview-controls {
+    margin-top: 28px;
+    padding-inline: 12px;
+  }
+
+  .preview-controls :deep(.el-button) {
+    min-height: 44px;
   }
 }
 

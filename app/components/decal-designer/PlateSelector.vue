@@ -1,15 +1,17 @@
 <template>
-  <div class="panel">
+  <div class="panel plate-selector-panel">
     <h2 class="design-panel-title">
       <Icon name="material-symbols:circle" class="text-blue-500" />
       <span>{{ $t("_designer.selectPlate") }}</span>
     </h2>
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="plate-list grid grid-cols-1 md:grid-cols-4 gap-4">
       <div v-for="plate in plates" :key="plate.id"
-        :class="['plate-card', { active: designStore.currentMainPlate?.id === plate.id }]"
-        @click="designStore.selectMainPlate(plate.id)">
-        <div class="rounded-full mx-auto mb-2 flex items-center justify-center">
-          <img :src="plate.image" class="w-18 h-18 object-contain" />
+        :class="['plate-card', 'main-plate-card', { active: designStore.currentMainPlate?.id === plate.id }]"
+        role="button" tabindex="0"
+        @click="designStore.selectMainPlate(plate.id)"
+        @keydown.enter.space.prevent="designStore.selectMainPlate(plate.id)">
+        <div class="plate-image rounded-full mx-auto mb-2 flex items-center justify-center">
+          <img :src="plate.image" class="w-18 h-18 object-contain" :alt="appStore.locale === 'zh-TW' ? plate.name_zh : plate.name_en" />
         </div>
         <div class="text-center plate-info text-gray-800">
           <h4>{{ appStore.locale === "zh-TW" ? plate.name_zh : plate.name_en }}</h4>
@@ -22,12 +24,14 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
+    <div class="surface-list grid grid-cols-1 md:grid-cols-5 gap-4 mt-6">
       <div v-for="(child, i) in currentMainPlate?.children" :key="child.id"
-        :class="['plate-card', { active: designStore.currentPlate?.id === child.id }]"
-        @click="designStore.selectPlate(child.id, i)">
-        <div class="rounded-full mx-auto mb-2 flex items-center justify-center">
-          <img :src="child.image" class="w-18 h-18 object-contain" />
+        :class="['plate-card', 'surface-card', { active: designStore.currentPlate?.id === child.id }]"
+        role="button" tabindex="0"
+        @click="designStore.selectPlate(child.id, i)"
+        @keydown.enter.space.prevent="designStore.selectPlate(child.id, i)">
+        <div class="surface-image rounded-full mx-auto mb-2 flex items-center justify-center">
+          <img :src="child.image" class="w-18 h-18 object-contain" :alt="appStore.locale === 'zh-TW' ? child.name_zh : child.name_en" />
         </div>
         <div class="text-center plate-info text-gray-800 mt-4">
           <h4>{{ appStore.locale === "zh-TW" ? child.name_zh : child.name_en }}</h4>
@@ -143,5 +147,69 @@ onMounted(initData);
   margin: 2px 0;
   font-size: 12px;
   color: #666;
+}
+
+@media (max-width: 768px) {
+  .plate-selector-panel {
+    padding: 14px 12px;
+  }
+
+  .plate-list {
+    display: flex;
+    gap: 10px;
+    padding: 2px 2px 10px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+  }
+
+  .main-plate-card {
+    flex: 0 0 min(168px, 46vw);
+    min-height: 166px;
+    padding: 10px;
+    scroll-snap-align: start;
+  }
+
+  .plate-image {
+    height: 76px;
+    margin-bottom: 4px;
+  }
+
+  .main-plate-card h4 {
+    min-height: 40px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .surface-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .surface-card {
+    min-width: 0;
+    min-height: 112px;
+    padding: 8px 5px;
+  }
+
+  .surface-image {
+    height: 60px;
+    margin-bottom: 2px;
+  }
+
+  .surface-card .plate-info {
+    margin-top: 4px;
+  }
+
+  .surface-card h4 {
+    overflow-wrap: anywhere;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
 }
 </style>

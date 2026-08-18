@@ -6,7 +6,7 @@
       <h2>{{ $t("_designer.designArea") }}</h2>
     </div>
 
-    <div class="canvas-wrapper">
+    <div ref="canvasWrapperRef" class="canvas-wrapper">
       <div class=" flex flex-col items-center">
         <!-- 盤子背景 -->
         <div ref="plateContainerRef" class="plate-container relative" :class="{ 'flipped': designStore.isFlipped }"
@@ -14,8 +14,8 @@
             background: currentPlate?.image
               ? `url(${currentPlate.image}) no-repeat center / contain`
               : '#ffffff',
-            width: currentPlate ? `${Number(currentPlate.size.width) * DESIGN_SCALE}px` : '0',
-            height: currentPlate ? `${Number(currentPlate.size.height) * DESIGN_SCALE}px` : '0',
+            width: currentPlate ? `${Number(currentPlate.size.width) * designScale}px` : '0',
+            height: currentPlate ? `${Number(currentPlate.size.height) * designScale}px` : '0',
             padding: '0',
 
           }" @click="clearSelection">
@@ -28,11 +28,11 @@
 
             <div v-for="pattern in placedPatterns" :key="pattern.id" class="pattern-on-plate"
               :class="{ selected: pattern.selected }" :style="{
-                left: pattern.x * DESIGN_SCALE + 'px',
-                top: pattern.y * DESIGN_SCALE + 'px',
+                left: pattern.x * designScale + 'px',
+                top: pattern.y * designScale + 'px',
                 transform: `rotate(${pattern.rotation}deg)`,
-                width: pattern.size.width * DESIGN_SCALE + 'px',
-                height: pattern.size.height * DESIGN_SCALE + 'px',
+                width: pattern.size.width * designScale + 'px',
+                height: pattern.size.height * designScale + 'px',
                 fontSize: getPatternSize(pattern.patternId) + 'px',
               }" @mousedown="startDrag(pattern.id, $event)" @touchstart.stop="startDrag(pattern.id, $event)">
               <div class="pattern-item" v-html="getPatternSvg(pattern.patternId)" :style="{
@@ -75,7 +75,11 @@
 
 <script setup lang="ts">
 const designStore = useDesignStore();
-const DESIGN_SCALE = 4;
+const MAX_DESIGN_SCALE = 4;
+const MOBILE_GUTTER = 24;
+const canvasWrapperRef = ref<HTMLElement | null>(null);
+const designScale = ref(MAX_DESIGN_SCALE);
+let canvasResizeObserver: ResizeObserver | null = null;
 
 // 計算屬性
 const currentPlate = computed(() => designStore.currentPlate);
@@ -83,7 +87,27 @@ const placedPatterns = computed(() => designStore.placedPatterns || []);
 const selectedPattern = computed(() => designStore.selectedPattern);
 const boundaryError = ref(false);
 
+const updateDesignScale = () => {
+  const plateWidth = Number(currentPlate.value?.size?.width || 0);
+  const plateHeight = Number(currentPlate.value?.size?.height || 0);
+  const wrapperWidth = canvasWrapperRef.value?.clientWidth || window.innerWidth;
+  const availableWidth = Math.max(160, wrapperWidth - MOBILE_GUTTER);
+  const availableHeight = Math.max(180, window.innerHeight * 0.62);
+
+  if (!plateWidth || !plateHeight) {
+    designScale.value = MAX_DESIGN_SCALE;
+    return;
+  }
+
+  designScale.value = Math.min(
+    MAX_DESIGN_SCALE,
+    availableWidth / plateWidth,
+    availableHeight / plateHeight,
+  );
+};
+
 type Point = { x: number; y: number };
+const PRINTABLE_INSET_SCALE = 0.94;
 
 const pointInPolygon = (point: Point, polygon: Point[]) => {
   let inside = false;
@@ -111,7 +135,10 @@ const isPointInsidePlate = (point: Point, plate: any) => {
       { x: width, y: height },
       { x: 0, y: height },
       { x: 0, y: height * 0.40 },
-    ];
+    ].map((outlinePoint) => ({
+      x: width / 2 + (outlinePoint.x - width / 2) * PRINTABLE_INSET_SCALE,
+      y: height / 2 + (outlinePoint.y - height / 2) * PRINTABLE_INSET_SCALE,
+    }));
     return pointInPolygon(point, houseOutline);
   }
 
@@ -119,7 +146,7 @@ const isPointInsidePlate = (point: Point, plate: any) => {
   const normalizedY = (point.y - height / 2) / (height / 2);
   const isDessertBowlFront = mainPlateId === "69f2f69560e697a7e0148919"
     && (plate?.surface === "front" || plate?.surface == null);
-  const printableRadius = isDessertBowlFront ? 0.72 : 0.98;
+  const printableRadius = isDessertBowlFront ? 0.68 : PRINTABLE_INSET_SCALE;
   return normalizedX ** 2 + normalizedY ** 2 <= printableRadius ** 2;
 };
 
@@ -249,10 +276,10 @@ const getPatternScreenCenter = (pattern: any) => {
   const containerRect = getContainerRect();
   if (!containerRect) return;
   // 图案在容器内的绝对坐标 left, top (未旋转时的位置)
-  const absLeft = containerRect.left + pattern.x * DESIGN_SCALE;
-  const absTop = containerRect.top + pattern.y * DESIGN_SCALE;
-  const centerX = absLeft + pattern.size.width * DESIGN_SCALE / 2;
-  const centerY = absTop + pattern.size.height * DESIGN_SCALE / 2;
+  const absLeft = containerRect.left + pattern.x * designScale.value;
+  const absTop = containerRect.top + pattern.y * designScale.value;
+  const centerX = absLeft + pattern.size.width * designScale.value / 2;
+  const centerY = absTop + pattern.size.height * designScale.value / 2;
   return { x: centerX, y: centerY };
 };
 
@@ -523,8 +550,8 @@ const onGlobalMouseMove = (e: any) => {
   if (isDragging && selectedPattern.value && selectedPattern.value.id !== null) {
     const dx = clientX - dragStartX;
     const dy = clientY - dragStartY;
-    const newLeft = originalLeft + dx / DESIGN_SCALE;
-    const newTop = originalTop + dy / DESIGN_SCALE;
+    const newLeft = originalLeft + dx / designScale.value;
+    const newTop = originalTop + dy / designScale.value;
     updatePatternPosition(dragTargetId, newLeft, newTop);
   }
   else if (isRotating && rotatingId !== null) {
@@ -556,6 +583,7 @@ const onGlobalMouseUp = () => {
 };
 
 const handleWindowResize = () => {
+  updateDesignScale();
   if (!plateContainerRef.value) return;
   placedPatterns.value.forEach(p => {
     const maxLeft = Math.max(0, Number(currentPlate.value?.size?.width || 0) - Number(p.size.width));
@@ -566,6 +594,10 @@ const handleWindowResize = () => {
 };
 
 onMounted(() => {
+  updateDesignScale();
+  canvasResizeObserver = new ResizeObserver(updateDesignScale);
+  if (canvasWrapperRef.value) canvasResizeObserver.observe(canvasWrapperRef.value);
+
   window.addEventListener('mousemove', onGlobalMouseMove);
   window.addEventListener('mouseup', onGlobalMouseUp);
 
@@ -578,6 +610,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  canvasResizeObserver?.disconnect();
   window.removeEventListener('mousemove', onGlobalMouseMove);
   window.removeEventListener('mouseup', onGlobalMouseUp);
 
@@ -586,6 +619,14 @@ onUnmounted(() => {
   window.removeEventListener('touchcancel', onGlobalMouseUp);
   window.removeEventListener('resize', handleWindowResize);
 });
+
+watch(
+  () => [currentPlate.value?.id, currentPlate.value?.size?.width, currentPlate.value?.size?.height],
+  async () => {
+    await nextTick();
+    updateDesignScale();
+  },
+);
 </script>
 
 <style scoped>
@@ -661,12 +702,17 @@ onUnmounted(() => {
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
 }
 
+.canvas-wrapper {
+  width: 100%;
+}
+
 .boundary-error {
   width: 100%;
-  margin: 0 0 8px;
+  margin: 4px 0 10px;
   color: #dc2626;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.4;
   text-align: center;
 }
 
@@ -686,6 +732,7 @@ onUnmounted(() => {
 .pattern-on-plate {
   position: absolute;
   cursor: grab;
+  touch-action: none;
   will-change: left, top, transform;
   transition: box-shadow 0.1s;
   transform-origin: center center;
@@ -817,17 +864,33 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
+  .boundary-error {
+    font-size: 20px;
+  }
+
+  .canvas-wrapper {
+    padding-inline: 0;
+  }
+
+  .canvas-wrapper > div {
+    width: 100%;
+  }
+
+  .canvas-wrapper :deep(.el-button) {
+    min-height: 44px;
+  }
+
+  .canvas-wrapper .flex.gap-3 {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
   .plate-options {
     grid-template-columns: repeat(2, 1fr);
   }
 
   .pattern-options {
     grid-template-columns: repeat(3, 1fr);
-  }
-
-  .plate-container {
-    width: 300px;
-    height: 300px;
   }
 
   .preview-plate {

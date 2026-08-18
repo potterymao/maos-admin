@@ -1,11 +1,15 @@
 <template>
   <div :class="layoutClasses" class="app-wrapper">
-    <div v-if="layoutClasses.mobile && layoutClasses.openSidebar" class="drawer-bg" @click="handleClickOutside" />
+    <div
+      v-if="!hideMobileChrome && layoutClasses.mobile && layoutClasses.openSidebar"
+      class="drawer-bg"
+      @click="handleClickOutside"
+    />
 
-    <Sidebar class="sidebar-container" />
+    <Sidebar v-if="!hideMobileChrome" class="sidebar-container" />
 
     <div class="main-container">
-      <div :class="{ 'fixed-header': fixedHeader }" class="layout-header">
+      <div v-if="!hideMobileChrome" :class="{ 'fixed-header': fixedHeader }" class="layout-header">
         <nav-bar />
       </div>
 
@@ -18,8 +22,12 @@
 
 const appStore = useAppStore();
 const settingsStore = useSettingsStore();
+const route = useRoute();
 
 const { fixedHeader } = storeToRefs(settingsStore);
+const hideMobileChrome = computed(
+  () => appStore.device === DeviceEnum.Mobile && route.meta.hideMobileChrome === true,
+);
 
 const layoutClasses = computed(() => {
   return {

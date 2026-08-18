@@ -1,11 +1,16 @@
 <template>
-  <div class="panel">
+  <div class="panel pattern-selector-panel">
     <h2 class="design-panel-title">
       <Icon name="material-symbols:category-rounded" class="text-blue-500 text-[28px]" />
       {{ $t("_designer.selectPattern") }}
     </h2>
 
-    <USelectMenu v-model="activeCategory" :items="categories" value-key="key" class="w-full mb-4" />
+    <USelectMenu
+      v-model="activeCategory"
+      :items="categories"
+      value-key="key"
+      class="pattern-category-select w-full mb-4"
+    />
 
     <div class="patterns-grid">
       <div v-for="pattern in filteredPatterns" :key="pattern.id" class="pattern-card" @click="addPattern(pattern.id)"
@@ -29,7 +34,7 @@
       </div>
     </div> -->
 
-    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+    <div class="pattern-help mt-6 p-4 bg-blue-50 rounded-lg">
       <h3 class="font-bold text-gray-800 mb-2">{{ $t("_designer.pattern_selector_desc") }}</h3>
       <ul class="text-sm text-gray-600 space-y-1">
         <li>{{ $t("_designer.pattern_selector_desc_1") }}</li>
@@ -148,6 +153,10 @@ const onDragStart = (pattern: any, event: DragEvent) => {
 </script>
 
 <style scoped>
+.pattern-selector-panel {
+  background: #fff;
+}
+
 .patterns-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -190,5 +199,47 @@ const onDragStart = (pattern: any, event: DragEvent) => {
   font-size: 12px;
   margin-bottom: 4px;
   color: #333;
+}
+
+@media (max-width: 768px) {
+  .pattern-selector-panel {
+    width: 100%;
+    padding: 12px 16px 10px;
+  }
+
+  .pattern-selector-panel .design-panel-title {
+    margin-bottom: 8px;
+    font-size: 1.25rem;
+  }
+
+  .pattern-category-select {
+    margin-bottom: 8px;
+  }
+
+  .patterns-grid {
+    display: flex;
+    gap: 8px;
+    padding: 2px 0 6px;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    scroll-snap-type: x proximity;
+  }
+
+  .pattern-card {
+    flex: 0 0 70px;
+    min-height: 70px;
+    padding: 5px;
+    scroll-snap-align: start;
+  }
+
+  .pattern-img {
+    width: 56px;
+    height: 56px;
+  }
+
+  .pattern-help {
+    display: none;
+  }
 }
 </style>

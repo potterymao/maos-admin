@@ -1,64 +1,85 @@
 <template>
-  <div class="container  mx-auto p-8 space-y-6">
-    <!-- 標題 -->
-    <header class="text-center mb-4">
-      <h1 class="text-3xl md:text-5xl  m-2">
-        <!-- <i class="i-mdi-palette mr-2"></i> -->
-        {{ $t("_designer.designer_title") }}
-      </h1>
-      <p class="text-xl text-gray-600 ">
-      {{ $t("_designer.designer_title_desc") }}
-      </p>
-    </header>
+  <div v-if="isMobile" class="mobile-designer">
+    <main class="mobile-designer-content">
+      <header class="mobile-intro">
+        <h1>{{ $t("_designer.designer_title") }}</h1>
+        <p>{{ $t("_designer.designer_title_desc") }}</p>
+      </header>
+
+      <section class="mobile-canvas-section" aria-label="設計區域">
+        <PlateCanvas />
+      </section>
+
+      <nav class="mobile-tool-tabs" aria-label="設計工具">
+        <button
+          v-for="tool in mobileTools"
+          :key="tool.key"
+          type="button"
+          :class="{ active: mobileTool === tool.key }"
+          :aria-selected="mobileTool === tool.key"
+          role="tab"
+          @click="mobileTool = tool.key"
+        >
+          <Icon :name="tool.icon" />
+          <span>{{ tool.label }}</span>
+        </button>
+      </nav>
+
+      <section class="mobile-tool-panel" role="tabpanel">
+        <PlateSelector v-show="mobileTool === 'vessel'" />
+        <PatternSelector v-show="mobileTool === 'pattern'" />
+        <PatternEditor v-show="mobileTool === 'adjust'" />
+      </section>
+
+      <DesignPreview v-if="designStore.showPreview" />
+    </main>
   </div>
 
-  <div class="p-4 md:p-6">
-    <div class="flex flex-col lg:flex-row gap-6 mb-8">
-      <!-- 左側：盤子和圖案選擇 -->
-      <!-- <div class="lg:w-1/5 space-y-6">
-        <PatternSelector />
-      </div> -->
-
-      <!-- 中間：設計區域 -->
-      <div class="lg:w-4/5 space-y-6">
-        <PlateSelector />
-        <!-- <PlateCanvas /> -->
-      </div>
-
-      <!-- 右側：圖案控制 -->
-      <div class="lg:w-1/5">
-        <!-- <PatternEditor /> -->
-      </div>
+  <div v-else class="desktop-designer">
+    <div class="designer-intro container mx-auto p-8 space-y-6">
+      <header class="text-center mb-4">
+        <h1 class="text-3xl md:text-5xl m-2">{{ $t("_designer.designer_title") }}</h1>
+        <p class="text-xl text-gray-600">{{ $t("_designer.designer_title_desc") }}</p>
+      </header>
     </div>
 
-    <div class="flex flex-col lg:flex-row gap-6 mb-8">
-      <!-- 左側：盤子和圖案選擇 -->
-      <div class="lg:w-1/5 space-y-6">
-        <PatternSelector />
+    <div class="designer-content p-4 md:p-6">
+      <div class="flex flex-col lg:flex-row gap-6 mb-8">
+        <div class="lg:w-4/5 space-y-6">
+          <PlateSelector />
+        </div>
+        <div class="lg:w-1/5" />
       </div>
 
-      <!-- 中間：設計區域 -->
-      <div class="lg:w-3/5 space-y-6">
-        <PlateCanvas />
+      <div class="flex flex-col lg:flex-row gap-6 mb-8">
+        <div class="lg:w-1/5 space-y-6"><PatternSelector /></div>
+        <div class="lg:w-3/5 space-y-6"><PlateCanvas /></div>
+        <div class="lg:w-1/5"><PatternEditor /></div>
       </div>
 
-      <!-- 右側：圖案控制 -->
-      <div class="lg:w-1/5">
-        <PatternEditor />
-      </div>
+      <DesignPreview v-if="designStore.showPreview" />
     </div>
-
-    <!-- 預覽區域 -->
-    <DesignPreview v-if="designStore.showPreview" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useDesignStore } from "~/stores/useDesignStore";
 
+definePageMeta({
+  hideMobileChrome: true,
+});
+
 // const { startDrag, startResize, startRotate } = usePlateDesigner();
 
 const designStore = useDesignStore();
+const { isMobile } = useDevice();
+type MobileTool = "vessel" | "pattern" | "adjust";
+const mobileTool = ref<MobileTool>("vessel");
+const mobileTools: Array<{ key: MobileTool; label: string; icon: string }> = [
+  { key: "vessel", label: "器皿", icon: "material-symbols:dinner-dining-rounded" },
+  { key: "pattern", label: "花紙", icon: "material-symbols:category-rounded" },
+  { key: "adjust", label: "調整", icon: "material-symbols:tune-rounded" },
+];
 
 _setToken('');
 </script>
@@ -259,27 +280,90 @@ _setToken('');
 }
 
 @media (max-width: 768px) {
-  .designer-main {
-    grid-template-columns: 1fr;
+  .mobile-designer {
+    min-height: 100dvh;
+    background: #ffea75;
   }
 
-  .left-sidebar {
-    position: fixed;
-    top: 64px;
-    left: 0;
-    bottom: 56px;
-    width: 280px;
-    z-index: 1000;
-    transform: translateX(-100%);
-    transition: transform 0.3s;
+  .mobile-designer-content {
+    padding: 12px;
   }
 
-  .left-sidebar.show {
-    transform: translateX(0);
+  .mobile-intro {
+    padding: 18px 12px 20px;
+    color: #26364a;
+    text-align: center;
   }
 
-  .header-right {
-    display: none;
+  .mobile-intro h1 {
+    margin: 0 0 6px;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .mobile-intro p {
+    margin: 0;
+    color: #596273;
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .mobile-canvas-section,
+  .mobile-tool-panel {
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .mobile-canvas-section :deep(.panel),
+  .mobile-tool-panel :deep(.panel) {
+    padding: 14px 12px;
+  }
+
+  .mobile-tool-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 35;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3px;
+    margin: 12px 0 8px;
+    padding: 3px;
+    border: 1px solid #d9dde5;
+    border-radius: 8px;
+    background: #f3f5f8;
+  }
+
+  .mobile-tool-tabs button {
+    display: flex;
+    min-width: 0;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 0;
+    border-radius: 6px;
+    color: #596273;
+    background: transparent;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .mobile-tool-tabs button.active {
+    color: #1d4ed8;
+    background: #fff;
+    box-shadow: 0 1px 4px rgb(15 23 42 / 14%);
+  }
+
+  .mobile-tool-tabs button :deep(svg) {
+    width: 21px;
+    height: 21px;
+  }
+
+  .mobile-tool-panel {
+    min-height: 180px;
   }
 }
 </style>
