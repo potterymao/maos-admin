@@ -515,9 +515,31 @@ const finishDesign = async () => {
   isAddingToCart.value = true;
 
   try {
+    const patternProducts = new Map<
+      string,
+      { id: string; variation_id: string; quantity: number }
+    >();
+
+    designStore.totalPatterns.flat().forEach((pattern) => {
+      if (!pattern?.parentId || !pattern?.patternId) return;
+
+      const key = `${pattern.parentId}:${pattern.patternId}`;
+      const product = patternProducts.get(key);
+
+      if (product) {
+        product.quantity += 1;
+      } else {
+        patternProducts.set(key, {
+          id: pattern.parentId,
+          variation_id: pattern.patternId,
+          quantity: 1,
+        });
+      }
+    });
+
     const products = [
-      ...designStore.addToCart,
-      { id: plateId, variation_id: variationId },
+      ...patternProducts.values(),
+      { id: plateId, variation_id: variationId, quantity: 1 },
     ];
     const response = await AddToCart(products);
     const cartLink = response?.link || response?.data?.link;
